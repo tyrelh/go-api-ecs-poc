@@ -1,0 +1,8 @@
+# Go build outpu
+bin/
+
+# Git metadata
+.git/
+
+# Secrets
+.env
