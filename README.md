@@ -55,7 +55,7 @@ curl http://localhost:8080/items
 
 1. Authenticate Docker to your Amazon ECR registry:
 ```bash
-aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
+aws ecr get-login-password --region us-west-2 --profile infrastructure-admin-dev | docker login --username AWS --password-stdin 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository
 ```
 
 2. Tag your image to match your ECR repository:
