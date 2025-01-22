@@ -5,7 +5,7 @@ This is a simple API POC using Go, Docker, and ECS.
 ## Build
 
 ```bash
-docker build -t go-api-poc .
+docker build -t go-api-poc:0.1.0 .
 ```
 
 ## Run Locally
