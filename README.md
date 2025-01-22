@@ -10,8 +10,31 @@ docker build -t go-api-poc .
 
 ## Run Locally
 
+Run just Go:
+```bash
+go run .
+```
+
+Or run the docker container:
 ```bash
 docker run -p 8080:8080 go-api-poc
+```
+
+## API
+
+Create a new item:
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"id": "22", "name": "🔮"}' http://localhost:8080/items
+```
+
+Fetch an item by id:
+```bash
+curl http://localhost:8080/items/22
+```
+
+Fetch all items:
+```bash
+curl http://localhost:8080/items
 ```
 
 ## Push to Amazon ECR
