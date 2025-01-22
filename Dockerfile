@@ -1,31 +1,31 @@
 # Use Go 1.23 bookworm as base image
-# FROM golang:latest AS base
+FROM golang:latest AS base
 
-# # Development stage
-# # =======================================================
-# # Create a development stage based on the base image
-# FROM base AS development
+# Development stage
+# =======================================================
+# Create a development stage based on the base image
+FROM base AS development
 
-# # Change the working directory to /app
-# WORKDIR /app
+# Change the working directory to /app
+WORKDIR /app
 
-# # Install the air CLI for auto-reloading
-# RUN go install github.com/airdb/air@latest
-# # RUN curl -sSfL https://goblin.run/github.com/air-verse/air | sh
+# Install the air CLI for auto-reloading
+RUN go install github.com/airdb/air@latest
+# RUN curl -sSfL https://goblin.run/github.com/air-verse/air | sh
 
-# # Copy the go.mod and go.sum files to the /app directory
-# COPY go.mod ./
+# Copy the go.mod and go.sum files to the /app directory
+COPY go.mod ./
 
-# # Install dependencies
-# RUN go mod download
+# Install dependencies
+RUN go mod download
 
-# # Start air for live reloading
-# CMD ["air"]
+# Start air for live reloading
+CMD ["air"]
 
 # Build stage
 # =======================================================
 # Create a build stage based on the base image
-FROM golang:1.23-alpine3.21 AS builder
+FROM base AS builder
 
 # Move to working directory /build
 WORKDIR /build
