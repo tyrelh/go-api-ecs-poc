@@ -8,11 +8,6 @@ import (
 	"go-api-poc/middleware"
 )
 
-type Item struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
 var (
 	items = make(map[string]Item)
 	mu    sync.Mutex

@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+type Item struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 func getItems(w http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
