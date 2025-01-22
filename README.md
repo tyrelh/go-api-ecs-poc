@@ -55,17 +55,17 @@ curl http://localhost:8080/items
 
 1. Authenticate Docker to your Amazon ECR registry:
 ```bash
-aws ecr get-login-password --region us-west-2 --profile infrastructure-admin-dev | docker login --username AWS --password-stdin 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository
+aws ecr get-login-password --region us-west-2 --profile infrastructure-admin-dev | docker login --username AWS --password-stdin 784593521445.dkr.ecr.us-west-2.amazonaws.com
 ```
 
 2. Tag your image to match your ECR repository:
 ```bash
-docker tag go-api-poc:latest <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/go-api-poc:latest
+docker tag go-api-poc:0.1.1 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:0.1.1
 ```
 
 3. Push the image to ECR:
 ```bash
-docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/go-api-poc:latest
+docker push 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:0.1.1
 ```
 
 Note: Replace the following placeholders:
