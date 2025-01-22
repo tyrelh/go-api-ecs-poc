@@ -20,6 +20,14 @@ Or run the docker container:
 docker run -p 8080:8080 go-api-poc
 ```
 
+Or using Air locally for hot-reloading:
+```bash
+# install Air
+curl -sSfL https://goblin.run/github.com/air-verse/air | sh
+# run Air
+air
+```
+
 ## API
 
 Create a new item:
