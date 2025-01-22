@@ -4,8 +4,14 @@ This is a simple API POC using Go, Docker, and ECS.
 
 ## Build
 
+Development build:
 ```bash
-docker build -t go-api-poc:0.1.0 .
+docker build -t go-api-poc:0.1.0 . --target development
+```
+
+Deployable build:
+```bash
+docker build -t go-api-poc:0.1.0 . --target production
 ```
 
 ## Run Locally
