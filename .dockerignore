@@ -1,5 +1,6 @@
-# Go build outpu
+# Go build output
 bin/
+tmp/
 
 # Git metadata
 .git/
