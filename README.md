@@ -68,12 +68,8 @@ docker tag go-api-poc:0.1.1 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-
 docker push 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:0.1.1
 ```
 
-Note: Replace the following placeholders:
-- `<your-account-id>`: Your AWS account ID
-- `<your-region>`: Your AWS region (e.g., us-east-1)
-
-Make sure you have:
-1. AWS CLI installed and configured
-2. Appropriate IAM permissions to push to ECR
-3. Created an ECR repository named 'go-api-poc'
+You can also use the Docker cli to pull images from ECR:
+```bash
+docker image pull 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:0.1.1
+```
 
