@@ -14,6 +14,9 @@ var (
 
 func main() {
 	router := http.NewServeMux()
+
+	router.HandleFunc("/go/system/health", controllers.HealthHandler)
+	router.HandleFunc("/go/system/version", controllers.VersionHandler)
 	router.HandleFunc("/go/items/{id}", controllers.ItemHandler)
 	router.HandleFunc("/go/items", controllers.ItemsHandler)
 
