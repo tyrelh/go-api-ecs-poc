@@ -60,12 +60,15 @@ aws ecr get-login-password --region us-west-2 --profile infrastructure-admin-dev
 
 2. Tag your image to match your ECR repository:
 ```bash
-docker tag go-api-poc:0.1.1 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:0.1.1
+VERSION="0.2.1"
+docker tag go-api-poc:${VERSION} 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:${VERSION}
+docker tag go-api-poc:${VERSION}784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:latest
 ```
 
 3. Push the image to ECR:
 ```bash
-docker push 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:0.1.1
+docker push 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:${VERSION}
+docker push 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:latest
 ```
 
 You can also use the Docker cli to pull images from ECR:
