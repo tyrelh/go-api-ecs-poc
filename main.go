@@ -3,21 +3,19 @@ package main
 import (
 	"log"
 	"net/http"
-	"sync"
 
+	"go-api-poc/controllers"
 	"go-api-poc/middleware"
 )
 
 var (
-	items = make(map[string]Item)
-	mu    sync.Mutex
-	port  = "8080"
+	port = "8080"
 )
 
 func main() {
 	router := http.NewServeMux()
-	router.HandleFunc("/items/{id}", itemHandler)
-	router.HandleFunc("/items", itemsHandler)
+	router.HandleFunc("/go/items/{id}", controllers.ItemHandler)
+	router.HandleFunc("/go/items", controllers.ItemsHandler)
 
 	server := &http.Server{
 		Addr:    ":" + port,

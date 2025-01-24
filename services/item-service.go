@@ -1,9 +1,10 @@
-package main
+package services
 
 import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"sync"
 )
 
 type Item struct {
@@ -11,9 +12,14 @@ type Item struct {
 	Name string `json:"name"`
 }
 
-func getItems(w http.ResponseWriter, r *http.Request) {
-	mu.Lock()
-	defer mu.Unlock()
+var (
+	items     = make(map[string]Item)
+	itemsLock sync.Mutex
+)
+
+func GetItems(w http.ResponseWriter, r *http.Request) {
+	itemsLock.Lock()
+	defer itemsLock.Unlock()
 
 	itemList := make([]Item, 0, len(items))
 	for _, item := range items {
@@ -32,9 +38,9 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(itemList)
 }
 
-func createItem(w http.ResponseWriter, r *http.Request) {
-	mu.Lock()
-	defer mu.Unlock()
+func CreateItem(w http.ResponseWriter, r *http.Request) {
+	itemsLock.Lock()
+	defer itemsLock.Unlock()
 
 	var item Item
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
@@ -51,9 +57,9 @@ func createItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(item)
 }
 
-func getItem(w http.ResponseWriter, r *http.Request, id string) {
-	mu.Lock()
-	defer mu.Unlock()
+func GetItem(w http.ResponseWriter, r *http.Request, id string) {
+	itemsLock.Lock()
+	defer itemsLock.Unlock()
 
 	item, exists := items[id]
 	if !exists {
@@ -68,9 +74,9 @@ func getItem(w http.ResponseWriter, r *http.Request, id string) {
 	json.NewEncoder(w).Encode(item)
 }
 
-func updateItem(w http.ResponseWriter, r *http.Request, id string) {
-	mu.Lock()
-	defer mu.Unlock()
+func UpdateItem(w http.ResponseWriter, r *http.Request, id string) {
+	itemsLock.Lock()
+	defer itemsLock.Unlock()
 
 	var item Item
 	if err := json.NewDecoder(r.Body).Decode(&item); err != nil || item.ID != id {
@@ -87,9 +93,9 @@ func updateItem(w http.ResponseWriter, r *http.Request, id string) {
 	json.NewEncoder(w).Encode(item)
 }
 
-func deleteItem(w http.ResponseWriter, id string) {
-	mu.Lock()
-	defer mu.Unlock()
+func DeleteItem(w http.ResponseWriter, id string) {
+	itemsLock.Lock()
+	defer itemsLock.Unlock()
 
 	if _, exists := items[id]; !exists {
 		http.Error(w, "Not found", http.StatusNotFound)

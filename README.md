@@ -51,7 +51,7 @@ Fetch all items:
 curl http://localhost:8080/items
 ```
 
-## Push to Amazon ECR
+## Push to Amazon ECR (Elastic Container Registry)
 
 1. Authenticate Docker to your Amazon ECR registry:
 ```bash
