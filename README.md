@@ -76,3 +76,8 @@ You can also use the Docker cli to pull images from ECR:
 docker image pull 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:0.1.1
 ```
 
+## Deploy latest version to ECS Service
+
+```bash
+aws ecs update-service --cluster go-api-poc-cluster --service go-api-poc-service --force-new-deployment --profile infrastructure-admin-dev
+```

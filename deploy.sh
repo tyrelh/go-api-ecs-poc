@@ -20,4 +20,9 @@ docker push 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:$
 docker push 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:latest
 echo "🟢 Push complete."
 
+echo "Deploying ${VERSION} to ECS service..."
+DEPLOY_RESPONSE=$(aws ecs update-service --cluster go-api-poc-cluster --service go-api-poc-service --force-new-deployment --profile infrastructure-admin-dev)
+echo "${DEPLOY_RESPONSE}"
+echo "🟢 Deployment initiated."
+
 echo ""; echo "✅ Done."
