@@ -4,7 +4,9 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
+	"os"
 	"sync"
 )
 
@@ -24,11 +26,22 @@ func GetVersion() string {
 }
 
 func createVersion() {
-	currentVersion = generateRandomName()
+	semanticVersion := getSemanticVersion()
+	currentVersion = fmt.Sprintf("%s:%s", semanticVersion, generateRandomName())
+	log.Println("Generated version: " + currentVersion)
 }
 
 func generateRandomName() string {
 	adj := adjectives[rand.Intn(len(adjectives))]
 	noun := nouns[rand.Intn(len(nouns))]
 	return fmt.Sprintf("%s-%s", adj, noun)
+}
+
+func getSemanticVersion() string {
+	data := os.Getenv("VERSION")
+	if data == "" {
+		log.Println("VERSION not set, using default version")
+		return "n.i.l"
+	}
+	return string(data)
 }

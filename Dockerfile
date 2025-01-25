@@ -47,12 +47,15 @@ RUN CGO_ENABLED=0 go build -o app
 # Create a production stage to run the application binary
 FROM scratch AS production
 
+ARG VERSION=none
+
 # Move to working directory /prod
 WORKDIR /prod
 
 # Copy binary from builder stage
 COPY --from=builder /build/app ./
 
+ENV VERSION=${VERSION}
 # Document the port that may need to be published
 EXPOSE 8080
 
