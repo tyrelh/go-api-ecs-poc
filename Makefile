@@ -7,10 +7,16 @@ dev:
 build:
 	@echo "### Build ###" && echo
 	@echo "Building version ${VERSION}..."
+	go build -o go-api-poc .
+	@echo "🟢 Build complete." && echo
+
+build-image:
+	@echo "### Build Image ###" && echo
+	@echo "Building version ${VERSION}..."
 	docker build -t go-api-poc:${VERSION} . --target production --build-arg VERSION=${VERSION}
 	@echo "🟢 Build complete." && echo
 
-push: build
+push: build-image
 	@echo && echo "### Push ###" && echo
 	@echo "Logging in to ECR..."
 	aws ecr get-login-password --region us-west-2 --profile infrastructure-admin-dev | docker login --username AWS --password-stdin 784593521445.dkr.ecr.us-west-2.amazonaws.com
