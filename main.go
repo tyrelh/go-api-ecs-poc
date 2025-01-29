@@ -17,8 +17,8 @@ func main() {
 
 	router.HandleFunc("/go/system/health", controllers.HealthHandler)
 	router.HandleFunc("/go/system/version", controllers.VersionHandler)
-	router.HandleFunc("/go/items/{id}", controllers.ItemHandler)
-	router.HandleFunc("/go/items", controllers.ItemsHandler)
+	router.HandleFunc("/go/item", controllers.ItemHandler)
+	router.HandleFunc("/go/item/{id}", controllers.ItemHandler)
 
 	server := &http.Server{
 		Addr:    ":" + port,
