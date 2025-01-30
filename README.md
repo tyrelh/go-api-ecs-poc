@@ -4,21 +4,30 @@ This is a simple API POC using Go, Docker, and ECS.
 
 ## Build
 
-Development build:
+Build Go:
 ```bash
-docker build -t go-api-poc:0.1.0 . --target development
+make build
 ```
 
-Deployable build:
+Build Go and Docker Image:
 ```bash
-docker build -t go-api-poc:0.1.0 . --target production
+make build-image
+```
+
+Build Docker Image and push to ECR:
+```bash
+# Will build image, then upload to ECR
+make push
 ```
 
 ## Run Locally
 
 Run just Go:
 ```bash
-go run .
+# install Air
+curl -sSfL https://goblin.run/github.com/air-verse/air | sh
+# run locally using Air
+make dev
 ```
 
 Or run the docker container:
@@ -26,58 +35,27 @@ Or run the docker container:
 docker run -p 8080:8080 go-api-poc
 ```
 
-Or using Air locally for hot-reloading:
+## Deploy to ECS
+
 ```bash
-# install Air
-curl -sSfL https://goblin.run/github.com/air-verse/air | sh
-# run Air
-air
+# Will build image, upload to ECR, then deploy to ECS
+make deploy
 ```
+
 
 ## API
 
 Create a new item:
 ```bash
-curl -X POST -H "Content-Type: application/json" -d '{"id": "22", "name": "🔮"}' http://localhost:8080/items
+curl -X POST -H "Content-Type: application/json" -d '{"id": "22", "name": "🔮"}' http://localhost:8080/item
 ```
 
 Fetch an item by id:
 ```bash
-curl http://localhost:8080/items/22
+curl http://localhost:8080/item/22
 ```
 
 Fetch all items:
 ```bash
-curl http://localhost:8080/items
-```
-
-## Push to Amazon ECR (Elastic Container Registry)
-
-1. Authenticate Docker to your Amazon ECR registry:
-```bash
-aws ecr get-login-password --region us-west-2 --profile infrastructure-admin-dev | docker login --username AWS --password-stdin 784593521445.dkr.ecr.us-west-2.amazonaws.com
-```
-
-2. Tag your image to match your ECR repository:
-```bash
-VERSION="0.2.1"
-docker tag go-api-poc:${VERSION} 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:${VERSION}
-docker tag go-api-poc:${VERSION}784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:latest
-```
-
-3. Push the image to ECR:
-```bash
-docker push 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:${VERSION}
-docker push 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:latest
-```
-
-You can also use the Docker cli to pull images from ECR:
-```bash
-docker image pull 784593521445.dkr.ecr.us-west-2.amazonaws.com/go-api-poc-repository:0.1.1
-```
-
-## Deploy latest version to ECS Service
-
-```bash
-aws ecs update-service --cluster go-api-poc-cluster --service go-api-poc-service --force-new-deployment --profile infrastructure-admin-dev
+curl http://localhost:8080/item
 ```
