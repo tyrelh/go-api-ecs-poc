@@ -3,6 +3,7 @@ package main
 import (
 	"go-api-poc/api"
 	"go-api-poc/controllers"
+	"go-api-poc/middleware"
 	"log"
 	"net/http"
 	// "go-api-poc/controllers"
@@ -33,7 +34,7 @@ func main() {
 	router := http.NewServeMux()
 	httpHandler := api.HandlerFromMux(serverDefinition, router)
 	server := &http.Server{
-		Handler: httpHandler,
+		Handler: middleware.Logging(httpHandler),
 		Addr:    ":" + port,
 	}
 	log.Println("Starting server on port " + port + "...")
