@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"go-api-poc/api"
 	"math/rand"
 	"sync"
@@ -50,4 +51,18 @@ func GetReward(rewardId int) *api.Reward {
 	}
 
 	return &reward
+}
+
+func DeleteReward(rewardId int) error {
+	rewardsLock.Lock()
+	defer rewardsLock.Unlock()
+
+	_, ok := rewardsDb[rewardId]
+	if !ok {
+		return fmt.Errorf("reward with id %d not found", rewardId)
+	}
+
+	delete(rewardsDb, rewardId)
+
+	return nil
 }

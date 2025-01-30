@@ -41,6 +41,9 @@ type ServerInterface interface {
 	// Create a reward
 	// (POST /go/reward)
 	PostGoReward(w http.ResponseWriter, r *http.Request)
+	// Delete a Reward by ID
+	// (DELETE /go/reward/{id})
+	DeleteGoRewardId(w http.ResponseWriter, r *http.Request, id int)
 	// Get a Reward by ID
 	// (GET /go/reward/{id})
 	GetGoRewardId(w http.ResponseWriter, r *http.Request, id int)
@@ -80,6 +83,31 @@ func (siw *ServerInterfaceWrapper) PostGoReward(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostGoReward(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteGoRewardId operation middleware
+func (siw *ServerInterfaceWrapper) DeleteGoRewardId(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteGoRewardId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -264,6 +292,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 
 	m.HandleFunc("GET "+options.BaseURL+"/go/reward", wrapper.GetGoReward)
 	m.HandleFunc("POST "+options.BaseURL+"/go/reward", wrapper.PostGoReward)
+	m.HandleFunc("DELETE "+options.BaseURL+"/go/reward/{id}", wrapper.DeleteGoRewardId)
 	m.HandleFunc("GET "+options.BaseURL+"/go/reward/{id}", wrapper.GetGoRewardId)
 	m.HandleFunc("GET "+options.BaseURL+"/go/system/health", wrapper.GetGoSystemHealth)
 	m.HandleFunc("GET "+options.BaseURL+"/go/system/version", wrapper.GetGoSystemVersion)
@@ -304,6 +333,30 @@ func (response PostGoReward201JSONResponse) VisitPostGoRewardResponse(w http.Res
 	w.WriteHeader(201)
 
 	return json.NewEncoder(w).Encode(response)
+}
+
+type DeleteGoRewardIdRequestObject struct {
+	Id int `json:"id"`
+}
+
+type DeleteGoRewardIdResponseObject interface {
+	VisitDeleteGoRewardIdResponse(w http.ResponseWriter) error
+}
+
+type DeleteGoRewardId204Response struct {
+}
+
+func (response DeleteGoRewardId204Response) VisitDeleteGoRewardIdResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type DeleteGoRewardId404Response struct {
+}
+
+func (response DeleteGoRewardId404Response) VisitDeleteGoRewardIdResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
 }
 
 type GetGoRewardIdRequestObject struct {
@@ -367,6 +420,9 @@ type StrictServerInterface interface {
 	// Create a reward
 	// (POST /go/reward)
 	PostGoReward(ctx context.Context, request PostGoRewardRequestObject) (PostGoRewardResponseObject, error)
+	// Delete a Reward by ID
+	// (DELETE /go/reward/{id})
+	DeleteGoRewardId(ctx context.Context, request DeleteGoRewardIdRequestObject) (DeleteGoRewardIdResponseObject, error)
 	// Get a Reward by ID
 	// (GET /go/reward/{id})
 	GetGoRewardId(ctx context.Context, request GetGoRewardIdRequestObject) (GetGoRewardIdResponseObject, error)
@@ -455,6 +511,32 @@ func (sh *strictHandler) PostGoReward(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostGoRewardResponseObject); ok {
 		if err := validResponse.VisitPostGoRewardResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// DeleteGoRewardId operation middleware
+func (sh *strictHandler) DeleteGoRewardId(w http.ResponseWriter, r *http.Request, id int) {
+	var request DeleteGoRewardIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.DeleteGoRewardId(ctx, request.(DeleteGoRewardIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "DeleteGoRewardId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(DeleteGoRewardIdResponseObject); ok {
+		if err := validResponse.VisitDeleteGoRewardIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

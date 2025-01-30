@@ -25,3 +25,12 @@ func (StrictServer) GetGoRewardId(ctx context.Context, request api.GetGoRewardId
 	reward := services.GetReward(rewardId)
 	return api.GetGoRewardId200JSONResponse(*reward), nil
 }
+
+func (StrictServer) DeleteGoRewardId(ctx context.Context, request api.DeleteGoRewardIdRequestObject) (api.DeleteGoRewardIdResponseObject, error) {
+	rewardId := request.Id
+	err := services.DeleteReward(rewardId)
+	if err != nil {
+		return api.DeleteGoRewardId404Response{}, nil
+	}
+	return api.DeleteGoRewardId204Response{}, nil
+}
