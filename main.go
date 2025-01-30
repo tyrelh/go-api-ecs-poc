@@ -15,29 +15,13 @@ var (
 )
 
 func main() {
-	// router := http.NewServeMux()
-
-	// router.HandleFunc("/go/system/health", controllers.HealthHandler)
-	// router.HandleFunc("/go/system/version", controllers.VersionHandler)
-	// router.HandleFunc("/go/item", controllers.ItemHandler)
-	// router.HandleFunc("/go/item/{id}", controllers.ItemHandler)
-
-	// server := &http.Server{
-	// 	Addr:    ":" + port,
-	// 	Handler: middleware.Logging(router),
-	// }
-	// log.Println("Starting server on port " + port)
-	// server.ListenAndServe()
-
 	// create a type that satisfies the `api.ServerInterface`, which contains an implementation of every operation from the generated code
 	serverDefinition := controllers.NewServer()
 	router := http.NewServeMux()
-	// httpHandler := api.HandlerFromMux(serverDefinition, router)
 	httpHandler := api.HandlerWithOptions(serverDefinition, api.StdHTTPServerOptions{
 		BaseRouter: router,
 		Middlewares: []api.MiddlewareFunc{
 			middleware.Logging,
-			middleware.LogResponseCode,
 		},
 	})
 	server := &http.Server{
