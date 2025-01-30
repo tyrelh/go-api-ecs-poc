@@ -4,4 +4,4 @@ generate:
   std-http-server: true
   models: true
   strict-server: true
-output: gen.go
+output: openapi/api.gen.go

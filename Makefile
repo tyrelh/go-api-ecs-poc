@@ -6,7 +6,7 @@ dev:
 
 oapi:
 	@echo "Generating OpenAPI code..."
-	oapi-codegen --config=openapi/oapi-codegen.yml openapi/api.yml
+	oapi-codegen --config=api/oapi-codegen.yml api/api.yml
 	@echo "🟢 OpenAPI code generated." && echo
 
 build:

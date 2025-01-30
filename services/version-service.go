@@ -16,13 +16,13 @@ var nouns = []string{"horse", "sea", "sky", "forest", "mountain", "river", "tree
 var currentVersion = ""
 var versionLock sync.Mutex
 
-func GetVersion() string {
+func GetVersion() *string {
 	versionLock.Lock()
 	defer versionLock.Unlock()
 	if currentVersion == "" {
 		createVersion()
 	}
-	return currentVersion
+	return &currentVersion
 }
 
 func createVersion() {
