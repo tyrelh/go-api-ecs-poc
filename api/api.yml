@@ -37,36 +37,36 @@ paths:
                   status:
                     type: string
                     example: ItsGood
-#   /go/item:
-#     get:
-#       summary: Get a list of items
-#       responses:
-#         '200':
-#           description: A list of items
-#           content:
-#             application/json:
-#               schema:
-#                 type: object
-#                 properties:
-#                   items:
-#                     type: array
-#                     items:
-#                       $ref: '#/components/schemas/Item'
-#     post:
-#       summary: Create an item
-#       requestBody:
-#         required: true
-#         content:
-#           application/json:
-#             schema:
-#               $ref: '#/components/schemas/Item'
-#       responses:
-#         '201':
-#           description: The created item
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: '#/components/schemas/Item'
+  /go/reward:
+    get:
+      summary: Get a list of active rewards for your account
+      responses:
+        '200':
+          description: A list of rewards
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rewards:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Reward'
+    post:
+      summary: Create a reward
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewardCreation'
+      responses:
+        '201':
+          description: The created reward
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reward'
 #   /go/item/{id}:
 #     get:
 #       summary: Get an item by ID
@@ -118,14 +118,32 @@ paths:
 #       responses:
 #         '204':
 #           description: The item was deleted
-# components:
-#   schemas:
-#     Item:
-#       type: object
-#       properties:
-#         id:
-#           type: string
-#           example: 1
-#         name:
-#           type: string
-#           example: Pokedex
+components:
+  schemas:
+    Reward:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+        brand:
+          type: string
+          example: Pokemart
+        currency:
+          type: string
+          example: PKD
+        denomination:
+          type: number
+          example: 1000
+    RewardCreation:
+      type: object
+      properties:
+        brand:
+          type: string
+          example: Pokemart
+        currency:
+          type: string
+          example: PKD
+        denomination:
+          type: number
+          example: 1000

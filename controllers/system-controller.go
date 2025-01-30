@@ -1,29 +1,22 @@
 package controllers
 
 import (
+	"context"
 	"go-api-poc/services"
-	"net/http"
 
 	"go-api-poc/api"
 )
 
-func (Server) GetGoSystemVersion(w http.ResponseWriter, r *http.Request) {
-	resp := api.GetGoSystemVersion200JSONResponse{
-		Version: services.GetVersion(),
-	}
-	resp.VisitGetGoSystemVersionResponse(w)
-
-	// w.WriteHeader(http.StatusOK)
-	// _ = json.NewEncoder(w).Encode(resp)
+func (StrictServer) GetGoSystemVersion(ctx context.Context, request api.GetGoSystemVersionRequestObject) (api.GetGoSystemVersionResponseObject, error) {
+	version := services.GetVersion()
+	return api.GetGoSystemVersion200JSONResponse{
+		Version: version,
+	}, nil
 }
 
-func (Server) GetGoSystemHealth(w http.ResponseWriter, r *http.Request) {
+func (StrictServer) GetGoSystemHealth(ctx context.Context, request api.GetGoSystemHealthRequestObject) (api.GetGoSystemHealthResponseObject, error) {
 	health := "I'm ok."
-	resp := api.GetGoSystemHealth200JSONResponse{
+	return api.GetGoSystemHealth200JSONResponse{
 		Status: &health,
-	}
-	resp.VisitGetGoSystemHealthResponse(w)
-
-	// w.WriteHeader(http.StatusOK)
-	// _ = json.NewEncoder(w).Encode(resp)
+	}, nil
 }

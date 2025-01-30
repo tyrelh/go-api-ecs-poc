@@ -14,8 +14,32 @@ import (
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
+// Reward defines model for Reward.
+type Reward struct {
+	Brand        *string  `json:"brand,omitempty"`
+	Currency     *string  `json:"currency,omitempty"`
+	Denomination *float32 `json:"denomination,omitempty"`
+	Id           *float32 `json:"id,omitempty"`
+}
+
+// RewardCreation defines model for RewardCreation.
+type RewardCreation struct {
+	Brand        *string  `json:"brand,omitempty"`
+	Currency     *string  `json:"currency,omitempty"`
+	Denomination *float32 `json:"denomination,omitempty"`
+}
+
+// PostGoRewardJSONRequestBody defines body for PostGoReward for application/json ContentType.
+type PostGoRewardJSONRequestBody = RewardCreation
+
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get a list of active rewards for your account
+	// (GET /go/reward)
+	GetGoReward(w http.ResponseWriter, r *http.Request)
+	// Create a reward
+	// (POST /go/reward)
+	PostGoReward(w http.ResponseWriter, r *http.Request)
 	// Get the health of the API
 	// (GET /go/system/health)
 	GetGoSystemHealth(w http.ResponseWriter, r *http.Request)
@@ -32,6 +56,34 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// GetGoReward operation middleware
+func (siw *ServerInterfaceWrapper) GetGoReward(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetGoReward(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostGoReward operation middleware
+func (siw *ServerInterfaceWrapper) PostGoReward(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostGoReward(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
 
 // GetGoSystemHealth operation middleware
 func (siw *ServerInterfaceWrapper) GetGoSystemHealth(w http.ResponseWriter, r *http.Request) {
@@ -181,10 +233,47 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
+	m.HandleFunc("GET "+options.BaseURL+"/go/reward", wrapper.GetGoReward)
+	m.HandleFunc("POST "+options.BaseURL+"/go/reward", wrapper.PostGoReward)
 	m.HandleFunc("GET "+options.BaseURL+"/go/system/health", wrapper.GetGoSystemHealth)
 	m.HandleFunc("GET "+options.BaseURL+"/go/system/version", wrapper.GetGoSystemVersion)
 
 	return m
+}
+
+type GetGoRewardRequestObject struct {
+}
+
+type GetGoRewardResponseObject interface {
+	VisitGetGoRewardResponse(w http.ResponseWriter) error
+}
+
+type GetGoReward200JSONResponse struct {
+	Rewards *[]Reward `json:"rewards,omitempty"`
+}
+
+func (response GetGoReward200JSONResponse) VisitGetGoRewardResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostGoRewardRequestObject struct {
+	Body *PostGoRewardJSONRequestBody
+}
+
+type PostGoRewardResponseObject interface {
+	VisitPostGoRewardResponse(w http.ResponseWriter) error
+}
+
+type PostGoReward201JSONResponse Reward
+
+func (response PostGoReward201JSONResponse) VisitPostGoRewardResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetGoSystemHealthRequestObject struct {
@@ -225,6 +314,12 @@ func (response GetGoSystemVersion200JSONResponse) VisitGetGoSystemVersionRespons
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+	// Get a list of active rewards for your account
+	// (GET /go/reward)
+	GetGoReward(ctx context.Context, request GetGoRewardRequestObject) (GetGoRewardResponseObject, error)
+	// Create a reward
+	// (POST /go/reward)
+	PostGoReward(ctx context.Context, request PostGoRewardRequestObject) (PostGoRewardResponseObject, error)
 	// Get the health of the API
 	// (GET /go/system/health)
 	GetGoSystemHealth(ctx context.Context, request GetGoSystemHealthRequestObject) (GetGoSystemHealthResponseObject, error)
@@ -260,6 +355,61 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
+}
+
+// GetGoReward operation middleware
+func (sh *strictHandler) GetGoReward(w http.ResponseWriter, r *http.Request) {
+	var request GetGoRewardRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetGoReward(ctx, request.(GetGoRewardRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetGoReward")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetGoRewardResponseObject); ok {
+		if err := validResponse.VisitGetGoRewardResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PostGoReward operation middleware
+func (sh *strictHandler) PostGoReward(w http.ResponseWriter, r *http.Request) {
+	var request PostGoRewardRequestObject
+
+	var body PostGoRewardJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PostGoReward(ctx, request.(PostGoRewardRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostGoReward")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PostGoRewardResponseObject); ok {
+		if err := validResponse.VisitPostGoRewardResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
 }
 
 // GetGoSystemHealth operation middleware

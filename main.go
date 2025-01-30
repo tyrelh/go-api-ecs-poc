@@ -16,14 +16,31 @@ var (
 
 func main() {
 	// create a type that satisfies the `api.ServerInterface`, which contains an implementation of every operation from the generated code
-	serverDefinition := controllers.NewServer()
+	// serverDefinition := controllers.NewServer()
+	serverDefinition := controllers.NewStrictServer()
 	router := http.NewServeMux()
-	httpHandler := api.HandlerWithOptions(serverDefinition, api.StdHTTPServerOptions{
+	strictServerDefinition := api.NewStrictHandler(
+		serverDefinition,
+		[]api.StrictMiddlewareFunc{},
+	)
+	httpHandler := api.HandlerWithOptions(strictServerDefinition, api.StdHTTPServerOptions{
 		BaseRouter: router,
 		Middlewares: []api.MiddlewareFunc{
 			middleware.Logging,
 		},
 	})
+	// httpHandler := api.NewStrictHandlerWithOptions(
+	// 	serverDefinition,
+	// 	[]api.StrictMiddlewareFunc{
+	// 		middleware.Logging,
+	// 	},
+	// 	api.StdHTTPServerOptions{
+	// 		BaseRouter: router,
+	// 		Middlewares: []api.MiddlewareFunc{
+	// 			middleware.Logging,
+	// 		},
+	// 	},
+	// )
 	server := &http.Server{
 		Handler: httpHandler,
 		Addr:    ":" + port,
