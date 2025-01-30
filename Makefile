@@ -4,6 +4,11 @@ dev:
 	@echo "Local dev using Air"
 	@air
 
+oapi:
+	@echo "Generating OpenAPI code..."
+	oapi-codegen --config=openapi/oapi-codegen.yml openapi/api.yml
+	@echo "🟢 OpenAPI code generated." && echo
+
 build:
 	@echo "### Build ###" && echo
 	@echo "Building version ${VERSION}..."

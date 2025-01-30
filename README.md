@@ -20,6 +20,25 @@ Build Docker Image and push to ECR:
 make push
 ```
 
+### WIP
+Install [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen):
+```bash
+go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+```
+For a go binary like this to work on your machine as expected, you need to add your GOPATH to your PATH. On MacOS the default GOPATH is *~/go/bin*.
+
+Add the following somewhere in your *~/.zshrc* file:
+```
+# go path
+export GOPATH="$HOME/go"
+export PATH=$PATH:$GOPATH/bin
+```
+Then you should be able to test it with
+```bash
+oapi-codegen -version
+```
+
+
 ## Run Locally
 
 Run just Go:
