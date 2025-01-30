@@ -16,6 +16,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Get the health of the API
+	// (GET /go/system/health)
+	GetGoSystemHealth(w http.ResponseWriter, r *http.Request)
 	// Get the version of the API
 	// (GET /go/system/version)
 	GetGoSystemVersion(w http.ResponseWriter, r *http.Request)
@@ -29,6 +32,20 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.Handler) http.Handler
+
+// GetGoSystemHealth operation middleware
+func (siw *ServerInterfaceWrapper) GetGoSystemHealth(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetGoSystemHealth(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
 
 // GetGoSystemVersion operation middleware
 func (siw *ServerInterfaceWrapper) GetGoSystemVersion(w http.ResponseWriter, r *http.Request) {
@@ -164,9 +181,28 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
+	m.HandleFunc("GET "+options.BaseURL+"/go/system/health", wrapper.GetGoSystemHealth)
 	m.HandleFunc("GET "+options.BaseURL+"/go/system/version", wrapper.GetGoSystemVersion)
 
 	return m
+}
+
+type GetGoSystemHealthRequestObject struct {
+}
+
+type GetGoSystemHealthResponseObject interface {
+	VisitGetGoSystemHealthResponse(w http.ResponseWriter) error
+}
+
+type GetGoSystemHealth200JSONResponse struct {
+	Status *string `json:"status,omitempty"`
+}
+
+func (response GetGoSystemHealth200JSONResponse) VisitGetGoSystemHealthResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type GetGoSystemVersionRequestObject struct {
@@ -189,6 +225,9 @@ func (response GetGoSystemVersion200JSONResponse) VisitGetGoSystemVersionRespons
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+	// Get the health of the API
+	// (GET /go/system/health)
+	GetGoSystemHealth(ctx context.Context, request GetGoSystemHealthRequestObject) (GetGoSystemHealthResponseObject, error)
 	// Get the version of the API
 	// (GET /go/system/version)
 	GetGoSystemVersion(ctx context.Context, request GetGoSystemVersionRequestObject) (GetGoSystemVersionResponseObject, error)
@@ -221,6 +260,30 @@ type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
 	options     StrictHTTPServerOptions
+}
+
+// GetGoSystemHealth operation middleware
+func (sh *strictHandler) GetGoSystemHealth(w http.ResponseWriter, r *http.Request) {
+	var request GetGoSystemHealthRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetGoSystemHealth(ctx, request.(GetGoSystemHealthRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetGoSystemHealth")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetGoSystemHealthResponseObject); ok {
+		if err := validResponse.VisitGetGoSystemHealthResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
 }
 
 // GetGoSystemVersion operation middleware

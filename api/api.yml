@@ -23,20 +23,20 @@ paths:
                   version:
                     type: string
                     example: 0.8.0:blue-sun
-#   /go/system/health:
-#     get:
-#       summary: Get the health of the API
-#       responses:
-#         '200':
-#           description: The health of the API
-#           content:
-#             application/json:
-#               schema:
-#                 type: object
-#                 properties:
-#                   status:
-#                     type: string
-#                     example: ItsGood
+  /go/system/health:
+    get:
+      summary: Get the health of the API
+      responses:
+        '200':
+          description: The health of the API
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ItsGood
 #   /go/item:
 #     get:
 #       summary: Get a list of items

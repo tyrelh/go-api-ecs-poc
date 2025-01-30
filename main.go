@@ -32,9 +32,16 @@ func main() {
 	// create a type that satisfies the `api.ServerInterface`, which contains an implementation of every operation from the generated code
 	serverDefinition := controllers.NewServer()
 	router := http.NewServeMux()
-	httpHandler := api.HandlerFromMux(serverDefinition, router)
+	// httpHandler := api.HandlerFromMux(serverDefinition, router)
+	httpHandler := api.HandlerWithOptions(serverDefinition, api.StdHTTPServerOptions{
+		BaseRouter: router,
+		Middlewares: []api.MiddlewareFunc{
+			middleware.Logging,
+			middleware.LogResponseCode,
+		},
+	})
 	server := &http.Server{
-		Handler: middleware.Logging(httpHandler),
+		Handler: httpHandler,
 		Addr:    ":" + port,
 	}
 	log.Println("Starting server on port " + port + "...")
