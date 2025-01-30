@@ -51,14 +51,7 @@ paths:
                   items:
                     type: array
                     items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          example: 1
-                        name:
-                          type: string
-                          example: Pokedex
+                      $ref: '#/components/schemas/Item'
   /go/item/{id}:
     get:
       summary: Get an item by ID
@@ -75,14 +68,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    example: 1
-                  name:
-                    type: string
-                    example: Pokedex
+                $ref: '#/components/schemas/Item'
     post:
       summary: Create an item
       requestBody:
@@ -90,28 +76,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: Pokedex
-                id:
-                  type: string
-                  example: 1
+              $ref: '#/components/schemas/Item'
       responses:
         '201':
           description: The created item
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    example: 1
-                  name:
-                    type: string
-                    example: Pokedex
+                $ref: '#/components/schemas/Item'
     put:
       summary: Update an item by ID
       parameters:
@@ -126,28 +98,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                  example: Pokedex
-                id:
-                  type: string
-                  example: 1
+              $ref: '#/components/schemas/Item'
       responses:
         '200':
           description: The updated item
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    example: 1
-                  name:
-                    type: string
-                    example: Pokedex
+                $ref: '#/components/schemas/Item'
     delete:
       summary: Delete an item by ID
       parameters:
@@ -160,5 +118,15 @@ paths:
       responses:
         '204':
           description: The item was deleted
-
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 1
+        name:
+          type: string
+          example: Pokedex
           
