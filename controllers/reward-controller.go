@@ -19,3 +19,9 @@ func (StrictServer) PostGoReward(ctx context.Context, request api.PostGoRewardRe
 	reward := services.CreateReward(rewardRequestBody)
 	return api.PostGoReward201JSONResponse(reward), nil
 }
+
+func (StrictServer) GetGoRewardId(ctx context.Context, request api.GetGoRewardIdRequestObject) (api.GetGoRewardIdResponseObject, error) {
+	rewardId := request.Id
+	reward := services.GetReward(rewardId)
+	return api.GetGoRewardId200JSONResponse(*reward), nil
+}

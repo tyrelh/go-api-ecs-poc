@@ -67,30 +67,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Reward'
-#   /go/item/{id}:
-#     get:
-#       summary: Get an item by ID
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           description: The ID of the item
-#           schema:
-#             type: string
-#       responses:
-#         '200':
-#           description: An item
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: '#/components/schemas/Item'
+  /go/reward/{id}:
+    get:
+      summary: Get a Reward by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Reward
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A Reward
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reward'
 #     put:
-#       summary: Update an item by ID
+#       summary: Update a Reward by ID
 #       parameters:
 #         - name: id
 #           in: path
 #           required: true
-#           description: The ID of the item
+#           description: The ID of the Reward
 #           schema:
 #             type: string
 #       requestBody:
@@ -98,33 +98,33 @@ paths:
 #         content:
 #           application/json:
 #             schema:
-#               $ref: '#/components/schemas/Item'
+#               $ref: '#/components/schemas/Reward'
 #       responses:
 #         '200':
-#           description: The updated item
+#           description: The updated Reward
 #           content:
 #             application/json:
 #               schema:
-#                 $ref: '#/components/schemas/Item'
+#                 $ref: '#/components/schemas/Reward'
 #     delete:
-#       summary: Delete an item by ID
+#       summary: Delete a Reward by ID
 #       parameters:
 #         - name: id
 #           in: path
 #           required: true
-#           description: The ID of the item
+#           description: The ID of the Reward
 #           schema:
 #             type: string
 #       responses:
 #         '204':
-#           description: The item was deleted
+#           description: The Reward was deleted
 components:
   schemas:
     Reward:
       type: object
       properties:
         id:
-          type: number
+          type: integer
           example: 1
         brand:
           type: string

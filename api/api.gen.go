@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/oapi-codegen/runtime"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
@@ -19,7 +20,7 @@ type Reward struct {
 	Brand        *string  `json:"brand,omitempty"`
 	Currency     *string  `json:"currency,omitempty"`
 	Denomination *float32 `json:"denomination,omitempty"`
-	Id           *float32 `json:"id,omitempty"`
+	Id           *int     `json:"id,omitempty"`
 }
 
 // RewardCreation defines model for RewardCreation.
@@ -40,6 +41,9 @@ type ServerInterface interface {
 	// Create a reward
 	// (POST /go/reward)
 	PostGoReward(w http.ResponseWriter, r *http.Request)
+	// Get a Reward by ID
+	// (GET /go/reward/{id})
+	GetGoRewardId(w http.ResponseWriter, r *http.Request, id int)
 	// Get the health of the API
 	// (GET /go/system/health)
 	GetGoSystemHealth(w http.ResponseWriter, r *http.Request)
@@ -76,6 +80,31 @@ func (siw *ServerInterfaceWrapper) PostGoReward(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostGoReward(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetGoRewardId operation middleware
+func (siw *ServerInterfaceWrapper) GetGoRewardId(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetGoRewardId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -235,6 +264,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 
 	m.HandleFunc("GET "+options.BaseURL+"/go/reward", wrapper.GetGoReward)
 	m.HandleFunc("POST "+options.BaseURL+"/go/reward", wrapper.PostGoReward)
+	m.HandleFunc("GET "+options.BaseURL+"/go/reward/{id}", wrapper.GetGoRewardId)
 	m.HandleFunc("GET "+options.BaseURL+"/go/system/health", wrapper.GetGoSystemHealth)
 	m.HandleFunc("GET "+options.BaseURL+"/go/system/version", wrapper.GetGoSystemVersion)
 
@@ -272,6 +302,23 @@ type PostGoReward201JSONResponse Reward
 func (response PostGoReward201JSONResponse) VisitPostGoRewardResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetGoRewardIdRequestObject struct {
+	Id int `json:"id"`
+}
+
+type GetGoRewardIdResponseObject interface {
+	VisitGetGoRewardIdResponse(w http.ResponseWriter) error
+}
+
+type GetGoRewardId200JSONResponse Reward
+
+func (response GetGoRewardId200JSONResponse) VisitGetGoRewardIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -320,6 +367,9 @@ type StrictServerInterface interface {
 	// Create a reward
 	// (POST /go/reward)
 	PostGoReward(ctx context.Context, request PostGoRewardRequestObject) (PostGoRewardResponseObject, error)
+	// Get a Reward by ID
+	// (GET /go/reward/{id})
+	GetGoRewardId(ctx context.Context, request GetGoRewardIdRequestObject) (GetGoRewardIdResponseObject, error)
 	// Get the health of the API
 	// (GET /go/system/health)
 	GetGoSystemHealth(ctx context.Context, request GetGoSystemHealthRequestObject) (GetGoSystemHealthResponseObject, error)
@@ -405,6 +455,32 @@ func (sh *strictHandler) PostGoReward(w http.ResponseWriter, r *http.Request) {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(PostGoRewardResponseObject); ok {
 		if err := validResponse.VisitPostGoRewardResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// GetGoRewardId operation middleware
+func (sh *strictHandler) GetGoRewardId(w http.ResponseWriter, r *http.Request, id int) {
+	var request GetGoRewardIdRequestObject
+
+	request.Id = id
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.GetGoRewardId(ctx, request.(GetGoRewardIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetGoRewardId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(GetGoRewardIdResponseObject); ok {
+		if err := validResponse.VisitGetGoRewardIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

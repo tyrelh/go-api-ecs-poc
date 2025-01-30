@@ -29,18 +29,7 @@ func main() {
 			middleware.Logging,
 		},
 	})
-	// httpHandler := api.NewStrictHandlerWithOptions(
-	// 	serverDefinition,
-	// 	[]api.StrictMiddlewareFunc{
-	// 		middleware.Logging,
-	// 	},
-	// 	api.StdHTTPServerOptions{
-	// 		BaseRouter: router,
-	// 		Middlewares: []api.MiddlewareFunc{
-	// 			middleware.Logging,
-	// 		},
-	// 	},
-	// )
+
 	server := &http.Server{
 		Handler: httpHandler,
 		Addr:    ":" + port,

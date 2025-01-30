@@ -1,14 +1,13 @@
 package services
 
 import (
-	"fmt"
 	"go-api-poc/api"
 	"math/rand"
 	"sync"
 )
 
 var (
-	rewardsDb   = make(map[string]api.Reward)
+	rewardsDb   = make(map[int]api.Reward)
 	rewardsLock sync.Mutex
 )
 
@@ -29,16 +28,26 @@ func CreateReward(rewardCreation api.RewardCreation) api.Reward {
 	defer rewardsLock.Unlock()
 
 	newId := rand.Intn(10000)
-	newIdFloat := float32(newId)
-	newIdStr := fmt.Sprintf("%d", newId)
 	reward := api.Reward{
 		Brand:        rewardCreation.Brand,
 		Currency:     rewardCreation.Currency,
 		Denomination: rewardCreation.Denomination,
-		Id:           &newIdFloat,
+		Id:           &newId,
 	}
 
-	rewardsDb[newIdStr] = reward
+	rewardsDb[newId] = reward
 
 	return reward
+}
+
+func GetReward(rewardId int) *api.Reward {
+	rewardsLock.Lock()
+	defer rewardsLock.Unlock()
+
+	reward, ok := rewardsDb[rewardId]
+	if !ok {
+		return nil
+	}
+
+	return &reward
 }

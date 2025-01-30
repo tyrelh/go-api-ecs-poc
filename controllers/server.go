@@ -1,10 +1,10 @@
 package controllers
 
-type Server struct{}
+// type Server struct{}
 
-func NewServer() Server {
-	return Server{}
-}
+// func NewServer() Server {
+// 	return Server{}
+// }
 
 type StrictServer struct{}
 
