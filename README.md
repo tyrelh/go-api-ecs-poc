@@ -20,7 +20,7 @@ Build Docker Image and push to ECR:
 make push
 ```
 
-### WIP
+### OpenAPI Code Generation
 Install [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen):
 ```bash
 go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
@@ -33,9 +33,10 @@ Add the following somewhere in your *~/.zshrc* file:
 export GOPATH="$HOME/go"
 export PATH=$PATH:$GOPATH/bin
 ```
-Then you should be able to test it with
+
+Just run OpenAPI codegen for the *api/api.yml* API specification:
 ```bash
-oapi-codegen -version
+make api
 ```
 
 
@@ -51,6 +52,7 @@ make dev
 
 Or run the docker container:
 ```bash
+make build-image
 docker run -p 8080:8080 go-api-poc
 ```
 
@@ -59,22 +61,4 @@ docker run -p 8080:8080 go-api-poc
 ```bash
 # Will build image, upload to ECR, then deploy to ECS
 make deploy
-```
-
-
-## API
-
-Create a new item:
-```bash
-curl -X POST -H "Content-Type: application/json" -d '{"id": "22", "name": "🔮"}' http://localhost:8080/item
-```
-
-Fetch an item by id:
-```bash
-curl http://localhost:8080/item/22
-```
-
-Fetch all items:
-```bash
-curl http://localhost:8080/item
 ```
