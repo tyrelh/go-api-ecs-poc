@@ -20,6 +20,7 @@ dev: api
 build: api
 	@echo "##### BUILD #####" && echo
 	@echo "Building version ${VERSION} to ${BUILD_DIR}/${PROJECT_NAME}..."
+	go mod tidy
 	export GOOS=linux && \
 	export CGO_ENABLED=0 && \
 	go build -o ${BUILD_DIR}/${PROJECT_NAME} .
