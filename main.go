@@ -6,8 +6,6 @@ import (
 	"go-api-poc/middleware"
 	"log"
 	"net/http"
-	// "go-api-poc/controllers"
-	// "go-api-poc/middleware"
 )
 
 var (
@@ -16,20 +14,16 @@ var (
 
 func main() {
 	// create a type that satisfies the `api.ServerInterface`, which contains an implementation of every operation from the generated code
-	// serverDefinition := controllers.NewServer()
-	serverDefinition := controllers.NewStrictServer()
-	router := http.NewServeMux()
 	strictServerDefinition := api.NewStrictHandler(
-		serverDefinition,
+		controllers.NewStrictServer(),
 		[]api.StrictMiddlewareFunc{},
 	)
 	httpHandler := api.HandlerWithOptions(strictServerDefinition, api.StdHTTPServerOptions{
-		BaseRouter: router,
+		BaseRouter: http.NewServeMux(),
 		Middlewares: []api.MiddlewareFunc{
 			middleware.Logging,
 		},
 	})
-
 	server := &http.Server{
 		Handler: httpHandler,
 		Addr:    ":" + port,
