@@ -2,13 +2,56 @@
 
 This is a simple API POC using Go, Docker, and ECS.
 
+## Dependencies
+
+### Go
+If you don't already have Go installed, you can install with Brew:
+```bash
+brew install golang
+# test
+go version
+```
+### Docker
+I recommend just installing Docker Desktop. It comes bundled with the Docker & Compose CLIs:
+```bash
+brew install --cask docker
+# test
+docker -v
+```
+
+### Air
+[Air](https://github.com/air-verse/air) is a Go app used for hot-reloading Go projects. Can be installed via Goblin:
+```bash
+curl -sSfL https://goblin.run/github.com/air-verse/air | sh
+# add GOPATH to PATH if you don't already have this
+echo '\nexport GOPATH="$HOME/go"' >> ~/.zshrc
+echo '\nexport PATH=$PATH:$GOPATH/bin' >> ~/.zshrc
+# test
+air -v
+```
+
+### oapi-codegen
+[oapi-codegen](https://github.com/oapi-codegen/oapi-codegen) is a Go app used to generate the backend scaffolding code from the OpenAPI specification file. Can be installed globally with Go:
+```bash
+go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+# add GOPATH to PATH if you don't already have this
+echo '\nexport GOPATH="$HOME/go"' >> ~/.zshrc
+echo '\nexport PATH=$PATH:$GOPATH/bin' >> ~/.zshrc
+# test
+oapi-codegen -version
+```
+
+### AWS CLI
+For pushing images to ECR and triggering deployments to ECS you'll need the AWS CLI installed and appropriate permissions on your credentials.
+```bash
+brew install awscli
+# test
+aws --version
+```
+
 ## Run Locally
 
-Run just Go:
 ```bash
-# install Air
-curl -sSfL https://goblin.run/github.com/air-verse/air | sh
-# run locally using Air
 make dev
 ```
 
@@ -20,12 +63,12 @@ docker run -p 8080:8080 go-api-poc
 
 ## Build
 
-Build Go:
+Build Go binary:
 ```bash
 make build
 ```
 
-Build Go and Docker Image:
+Build Go binary and Docker Image:
 ```bash
 make build-image
 ```
