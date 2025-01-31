@@ -15,7 +15,7 @@ api:
 	oapi-codegen --config=api/oapi-codegen.yml api/api.yml
 	@echo "🟢 OpenAPI code generated." && echo
 
-build:
+build: api
 	@echo "##### BUILD #####" && echo
 	@echo "Building version ${VERSION} to ${BUILD_DIR}/${PROJECT_NAME}..."
 	export GOOS=linux && \
