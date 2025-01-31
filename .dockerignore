@@ -1,5 +1,5 @@
 # Go build output
-bin/
+# bin/
 tmp/
 
 # Git metadata
