@@ -6,14 +6,16 @@ ECR_REPOSITORY=go-api-poc-repository
 ECS_CLUSTER=go-api-poc-cluster
 ECS_SERVICE=go-api-poc-service
 
-dev:
-	@echo "Local dev using Air"
-	@air
 
 api:
 	@echo "Generating OpenAPI code..."
 	oapi-codegen --config=api/oapi-codegen.yml api/api.yml
 	@echo "🟢 OpenAPI code generated." && echo
+
+dev: api
+	@echo "Local dev using Air"
+	@echo "⚠️ Air won't hot-reload changes to the OpenAPI spec api/api.yml. You'll need to rerun make dev or make api."
+	@air
 
 build: api
 	@echo "##### BUILD #####" && echo

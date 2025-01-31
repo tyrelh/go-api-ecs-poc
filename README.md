@@ -2,6 +2,22 @@
 
 This is a simple API POC using Go, Docker, and ECS.
 
+## Run Locally
+
+Run just Go:
+```bash
+# install Air
+curl -sSfL https://goblin.run/github.com/air-verse/air | sh
+# run locally using Air
+make dev
+```
+
+Or run the docker container:
+```bash
+make build-image
+docker run -p 8080:8080 go-api-poc
+```
+
 ## Build
 
 Build Go:
@@ -37,23 +53,6 @@ export PATH=$PATH:$GOPATH/bin
 Just run OpenAPI codegen for the *api/api.yml* API specification:
 ```bash
 make api
-```
-
-
-## Run Locally
-
-Run just Go:
-```bash
-# install Air
-curl -sSfL https://goblin.run/github.com/air-verse/air | sh
-# run locally using Air
-make dev
-```
-
-Or run the docker container:
-```bash
-make build-image
-docker run -p 8080:8080 go-api-poc
 ```
 
 ## Deploy to ECS
