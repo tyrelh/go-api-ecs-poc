@@ -2,27 +2,21 @@ package services
 
 import (
 	"fmt"
+	"go-api-poc/models"
 	"math/rand"
 	"sync"
 )
 
 var (
-	rewardsDb   = make(map[int]Reward)
+	rewardsDb   = make(map[int]models.Reward)
 	rewardsLock sync.Mutex
 )
 
-type Reward struct {
-	Brand        *string  `json:"brand,omitempty"`
-	Currency     *string  `json:"currency,omitempty"`
-	Denomination *float32 `json:"denomination,omitempty"`
-	Id           *int     `json:"id,omitempty"`
-}
-
-func GetRewards() *[]Reward {
+func GetRewards() *[]models.Reward {
 	rewardsLock.Lock()
 	defer rewardsLock.Unlock()
 
-	rewardList := make([]Reward, 0, len(rewardsDb))
+	rewardList := make([]models.Reward, 0, len(rewardsDb))
 	for _, reward := range rewardsDb {
 		rewardList = append(rewardList, reward)
 	}
@@ -30,12 +24,12 @@ func GetRewards() *[]Reward {
 	return &rewardList
 }
 
-func CreateReward(brand *string, currency *string, denomination *float32) Reward {
+func CreateReward(brand *string, currency *string, denomination *float32) models.Reward {
 	rewardsLock.Lock()
 	defer rewardsLock.Unlock()
 
 	newId := rand.Intn(10000)
-	reward := Reward{
+	reward := models.Reward{
 		Brand:        brand,
 		Currency:     currency,
 		Denomination: denomination,
@@ -47,7 +41,7 @@ func CreateReward(brand *string, currency *string, denomination *float32) Reward
 	return reward
 }
 
-func GetReward(rewardId int) *Reward {
+func GetReward(rewardId int) *models.Reward {
 	rewardsLock.Lock()
 	defer rewardsLock.Unlock()
 
