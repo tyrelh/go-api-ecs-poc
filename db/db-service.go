@@ -36,6 +36,10 @@ func ConnectToDb() error {
 	return nil
 }
 
+func GetDbConnection() *gorm.DB {
+	return dbConnection
+}
+
 func autoMigrateTables() {
 	log.Println("Auto migrating tables...")
 	dbConnection.AutoMigrate(models.GetModels()...)

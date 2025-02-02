@@ -1,14 +1,14 @@
 package services
 
 import (
-	"fmt"
 	"go-api-poc/models"
-	"math/rand"
+	"log"
 	"sync"
+
+	"go-api-poc/db"
 )
 
 var (
-	rewardsDb   = make(map[int]models.Reward)
 	rewardsLock sync.Mutex
 )
 
@@ -16,8 +16,12 @@ func GetRewards() *[]models.Reward {
 	rewardsLock.Lock()
 	defer rewardsLock.Unlock()
 
-	rewardList := make([]models.Reward, 0, len(rewardsDb))
-	for _, reward := range rewardsDb {
+	db := db.GetDbConnection()
+	var rewards []models.Reward
+	db.Find(&rewards)
+
+	rewardList := make([]models.Reward, 0, len(rewards))
+	for _, reward := range rewards {
 		rewardList = append(rewardList, reward)
 	}
 
@@ -28,15 +32,16 @@ func CreateReward(brand *string, currency *string, denomination *float32) models
 	rewardsLock.Lock()
 	defer rewardsLock.Unlock()
 
-	newId := rand.Intn(10000)
 	reward := models.Reward{
 		Brand:        brand,
 		Currency:     currency,
 		Denomination: denomination,
-		Id:           &newId,
 	}
 
-	rewardsDb[newId] = reward
+	db := db.GetDbConnection()
+	result := db.Create(&reward)
+	log.Println("Error during creation: ", result.Error)
+	log.Println("Rows affected: ", result.RowsAffected)
 
 	return reward
 }
@@ -45,8 +50,11 @@ func GetReward(rewardId int) *models.Reward {
 	rewardsLock.Lock()
 	defer rewardsLock.Unlock()
 
-	reward, ok := rewardsDb[rewardId]
-	if !ok {
+	db := db.GetDbConnection()
+	var reward models.Reward
+	result := db.First(&reward, rewardId)
+
+	if result.RowsAffected == 0 {
 		return nil
 	}
 
@@ -57,12 +65,8 @@ func DeleteReward(rewardId int) error {
 	rewardsLock.Lock()
 	defer rewardsLock.Unlock()
 
-	_, ok := rewardsDb[rewardId]
-	if !ok {
-		return fmt.Errorf("reward with id %d not found", rewardId)
-	}
-
-	delete(rewardsDb, rewardId)
+	db := db.GetDbConnection()
+	db.Delete(&models.Reward{}, rewardId)
 
 	return nil
 }
