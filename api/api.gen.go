@@ -15,23 +15,23 @@ import (
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
-// Reward defines model for Reward.
-type Reward struct {
+// RewardRequest defines model for RewardRequest.
+type RewardRequest struct {
+	Brand        *string  `json:"brand,omitempty"`
+	Currency     *string  `json:"currency,omitempty"`
+	Denomination *float32 `json:"denomination,omitempty"`
+}
+
+// RewardResponse defines model for RewardResponse.
+type RewardResponse struct {
 	Brand        *string  `json:"brand,omitempty"`
 	Currency     *string  `json:"currency,omitempty"`
 	Denomination *float32 `json:"denomination,omitempty"`
 	Id           *int     `json:"id,omitempty"`
 }
 
-// RewardCreation defines model for RewardCreation.
-type RewardCreation struct {
-	Brand        *string  `json:"brand,omitempty"`
-	Currency     *string  `json:"currency,omitempty"`
-	Denomination *float32 `json:"denomination,omitempty"`
-}
-
 // PostGoRewardJSONRequestBody defines body for PostGoReward for application/json ContentType.
-type PostGoRewardJSONRequestBody = RewardCreation
+type PostGoRewardJSONRequestBody = RewardRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -308,7 +308,7 @@ type GetGoRewardResponseObject interface {
 }
 
 type GetGoReward200JSONResponse struct {
-	Rewards *[]Reward `json:"rewards,omitempty"`
+	Rewards *[]RewardResponse `json:"rewards,omitempty"`
 }
 
 func (response GetGoReward200JSONResponse) VisitGetGoRewardResponse(w http.ResponseWriter) error {
@@ -326,7 +326,7 @@ type PostGoRewardResponseObject interface {
 	VisitPostGoRewardResponse(w http.ResponseWriter) error
 }
 
-type PostGoReward201JSONResponse Reward
+type PostGoReward201JSONResponse RewardResponse
 
 func (response PostGoReward201JSONResponse) VisitPostGoRewardResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -367,7 +367,7 @@ type GetGoRewardIdResponseObject interface {
 	VisitGetGoRewardIdResponse(w http.ResponseWriter) error
 }
 
-type GetGoRewardId200JSONResponse Reward
+type GetGoRewardId200JSONResponse RewardResponse
 
 func (response GetGoRewardId200JSONResponse) VisitGetGoRewardIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")

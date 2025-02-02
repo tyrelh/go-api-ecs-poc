@@ -9,14 +9,30 @@ import (
 
 func (StrictServer) GetGoReward(ctx context.Context, request api.GetGoRewardRequestObject) (api.GetGoRewardResponseObject, error) {
 	rewards := services.GetRewards()
+
+	var rewardResponses []api.RewardResponse
+	for _, reward := range *rewards {
+		rewardResponses = append(rewardResponses, api.RewardResponse{
+			Brand:        reward.Brand,
+			Currency:     reward.Currency,
+			Denomination: reward.Denomination,
+			Id:           reward.Id,
+		})
+	}
+
 	return api.GetGoReward200JSONResponse{
-		Rewards: rewards,
+		Rewards: &rewardResponses,
 	}, nil
 }
 
 func (StrictServer) PostGoReward(ctx context.Context, request api.PostGoRewardRequestObject) (api.PostGoRewardResponseObject, error) {
 	rewardRequestBody := *request.Body
-	reward := services.CreateReward(rewardRequestBody)
+
+	reward := services.CreateReward(
+		rewardRequestBody.Brand,
+		rewardRequestBody.Currency,
+		rewardRequestBody.Denomination,
+	)
 	return api.PostGoReward201JSONResponse(reward), nil
 }
 
