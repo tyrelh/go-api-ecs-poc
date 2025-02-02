@@ -3,6 +3,7 @@ package main
 import (
 	"go-api-poc/api"
 	"go-api-poc/controllers"
+	"go-api-poc/db"
 	"go-api-poc/middleware"
 	"log"
 	"net/http"
@@ -28,6 +29,12 @@ func main() {
 		Handler: httpHandler,
 		Addr:    ":" + port,
 	}
+
+	err := db.ConnectToDb()
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
 	log.Println("Starting server on port " + port + "...")
 	log.Fatal(server.ListenAndServe())
 }
