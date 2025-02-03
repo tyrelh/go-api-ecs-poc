@@ -1,6 +1,4 @@
-# Progress
-
-## Local database running in Docker
+# Local database running in Docker
 
 Using the official MySQL image
 ```bash
@@ -11,7 +9,7 @@ Not sure why I didn't start with the latest version??
 `MYSQL_ROOT_PASSWORD` env variable needs to be set in Docker image container for MySQL8
 
 
-## GORM
+# GORM
 
 [GORM](https://gorm.io/docs/index.html) is the Go ORM. It's the most popular ORM solution for Go.
 
@@ -27,36 +25,36 @@ flush privileges;
 ```
 
 
-### Models
+## Models
 
 GORM can use your structs as database Models. https://gorm.io/docs/models.html
 
 You can optionally inject `gorm.Model` into your struct to get the automatic default fields `ID`, `CreatedAt`, `UpdatedAt`, and `DeletedAt`.
 
 
-### Deleting
+## Deleting
 
 It seems like if you have the `DeletedAt` field on your model, that will automatically enable soft-delete for that table. When deleting a timestamp gets set in the `DeletedAt` field and then this object is not returned in other queries, though it still remains in the database.
 
 I think if you don't have the `DeletedAt` field, hard-delete is the default.
 
 
-### Auto Migration
+## Auto Migration
 
 You can call the `AutoMigrate` function on the database connection, passing the models you're interested in, to force modification or creation of the database schema
 
 
-## OpenAPI & oapi-codegen
+# OpenAPI & oapi-codegen
 
 
-### OpenAPI
+## OpenAPI
 
 The OpenAPI 3.0 specification docs seem easy enough to follow: https://swagger.io/docs/specification/v3_0/basic-structure/
 
 One gotcha that caught me initially is that `number` in the spec is float32. There's a separate `integer` type for signed ints.
 
 
-#### Schemas
+### Schemas
 
 You can define schemas in-line in each response for request and response format, but more usefully you can define them separately in the `components:` block so that you can reuse them across endpoints. This also gives you control over their naming which can help keep them generic or directly related to internal data models instead of specific endpoints.
 
@@ -94,14 +92,14 @@ components:
 ```
 
 
-## oapi-codegen
+# oapi-codegen
 
 [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen) is a tool used to generate Go backend or client boilerplate code given an OpenAPI specification.
 
 In this project we're using it to generate server-side backend boilerplate for the standard _net/http_ server.
 
 
-### Command
+## Command
 
 ```bash
 oapi-codegen --config=api/oapi-codegen.yml api/api.yml
@@ -109,7 +107,7 @@ oapi-codegen --config=api/oapi-codegen.yml api/api.yml
 The two args here are the config file flag, and then the input OpenAPI specification.
 
 
-### Code generated
+## Code generated
 
 This tool generates a good chunk of the boilerplate necessary to hook up all your individual endpoints into your router.
 
@@ -138,7 +136,7 @@ Wrapping that custom implemented _ServerInterface_ in the cutomized _http.Handle
 By default the _ServerInterface_ you're given to implement has generic functions in it that take as args a basic request and response objects `w http.ResponseWriter, r *http.Request`, in addition to any URL parameters. You then need to parse any JSON yourself from the request and format the response JSON yourself.
 
 
-### Strict server
+## Strict server
 
 Instead of handling the request/response JSON manually yourself, you can optionally generate what oapi-codegen calls a _StrictServerInterface_. This is the same as the _ServerInterface_ except that it strictly enforces Request and Response types with some auto-generated structs.
 
@@ -166,7 +164,7 @@ I'm not totally sure the best way to organize this, but currently in the project
 There's also a simple central file that defines this custom struct, _controllers/server.go_. This feels a bit weird and in general the directory and package structure of this project is up for iteration.
 
 
-### Config
+## Config
 
 Some basic configuration for the tool can be set in a yaml file, for example _api/oapi-codegen.yml_:
 ```yml
