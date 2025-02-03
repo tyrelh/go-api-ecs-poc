@@ -13,6 +13,8 @@ Not sure why I didn't start with the latest version??
 
 ## GORM
 
+[GORM](https://gorm.io/docs/index.html) is the Go ORM. It's the most popular ORM solution for Go.
+
 Able to connect to the database running locally. Have it currently setup on port 5000.
 
 Created effectively an admin user to use.
