@@ -8,6 +8,14 @@ Not sure why I didn't start with the latest version??
 
 `MYSQL_ROOT_PASSWORD` env variable needs to be set in Docker image container for MySQL8
 
+Create a new connection in your db tool of choice (ie MySQL Workbench)
+
+After you run the MySQL container, connect to it using this new connection, using the _root_ user.
+
+Create a new database/schema. Call it `go_db`.
+
+
+
 
 # GORM
 
