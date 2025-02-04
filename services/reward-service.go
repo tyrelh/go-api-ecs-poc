@@ -74,3 +74,34 @@ func DeleteReward(rewardId int) error {
 
 	return nil
 }
+
+func PutReward(rewardId int, brand *string, currency *string, denomination *float32) *models.Reward {
+	rewardsLock.Lock()
+	defer rewardsLock.Unlock()
+
+	startTime := time.Now()
+	db := db.GetDbConnection()
+	var reward models.Reward
+	result := db.First(&reward, rewardId)
+	log.Printf("Time taken to get reward: %v", time.Since(startTime))
+
+	if result.RowsAffected == 0 {
+		return nil
+	}
+
+	if brand != nil {
+		reward.Brand = brand
+	}
+	if currency != nil {
+		reward.Currency = currency
+	}
+	if denomination != nil {
+		reward.Denomination = denomination
+	}
+
+	startTime = time.Now()
+	db.Save(&reward)
+	log.Printf("Time taken to update reward: %v", time.Since(startTime))
+
+	return &reward
+}

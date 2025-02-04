@@ -84,28 +84,28 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RewardResponse'
-    # put:
-    #   summary: Update a Reward by ID
-    #   parameters:
-    #     - name: id
-    #       in: path
-    #       required: true
-    #       description: The ID of the Reward
-    #       schema:
-    #         type: string
-    #   requestBody:
-    #     required: true
-    #     content:
-    #       application/json:
-    #         schema:
-    #           $ref: '#/components/schemas/RewardRequest'
-    #   responses:
-    #     '200':
-    #       description: The updated Reward
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: '#/components/schemas/RewardRequest'
+    put:
+      summary: Update a Reward by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Reward
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewardRequest'
+      responses:
+        '200':
+          description: The updated Reward
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewardRequest'
     delete:
       summary: Delete a Reward by ID
       parameters:

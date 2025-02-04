@@ -65,3 +65,21 @@ func (StrictServer) DeleteGoRewardId(ctx context.Context, request api.DeleteGoRe
 	}
 	return api.DeleteGoRewardId204Response{}, nil
 }
+
+func (StrictServer) PutGoRewardId(ctx context.Context, request api.PutGoRewardIdRequestObject) (api.PutGoRewardIdResponseObject, error) {
+	rewardId := request.Id
+	rewardRequestBody := *request.Body
+
+	reward := services.PutReward(
+		rewardId,
+		rewardRequestBody.Brand,
+		rewardRequestBody.Currency,
+		rewardRequestBody.Denomination,
+	)
+	rewardResponse := api.RewardRequest{
+		Brand:        reward.Brand,
+		Currency:     reward.Currency,
+		Denomination: reward.Denomination,
+	}
+	return api.PutGoRewardId200JSONResponse(rewardResponse), nil
+}
