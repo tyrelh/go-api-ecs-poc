@@ -104,3 +104,41 @@ make api
 # Will build image, upload to ECR, then deploy to ECS
 make deploy
 ```
+
+
+# API
+
+Create new Reward
+```bash
+curl -X POST -H "Content-Type: application/json" -d '{"brand": "Viridian City Pokemart", "currency": "PMD", "denomination": 1000}' http://localhost:8080/go/reward | jq
+```
+
+Get all Rewards
+```bash
+curl http://localhost:8080/go/reward | jq
+```
+
+Get specific Reward by ID
+```bash
+curl http://localhost:8080/go/reward/1 | jq
+```
+
+Update Reward
+```bash
+curl -X PUT -H "Content-Type: application/json" -d '{"brand": "Viridian City Pokemart", "currency": "PMD", "denomination": 1000}' http://localhost:8080/go/reward/1 | jq
+```
+
+Delete Reward
+```bash
+curl -X DELETE http://localhost:8080/go/reward/1 | jq
+```
+
+Get Health
+```bash
+curl http://localhost:8080/go/system/health | jq
+```
+
+Get Version
+```bash
+curl http://localhost:8080/go/system/version | jq
+```
