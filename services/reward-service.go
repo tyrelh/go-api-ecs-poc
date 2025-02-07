@@ -86,6 +86,7 @@ func PutReward(rewardId int, brand *string, currency *string, denomination *floa
 	log.Printf("Time taken to get reward: %v", time.Since(startTime))
 
 	if result.RowsAffected == 0 {
+		log.Printf("Reward with Id %v does not exist.", rewardId)
 		return nil
 	}
 
