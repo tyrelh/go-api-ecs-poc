@@ -38,11 +38,11 @@ func generateRandomName() string {
 }
 
 func getSemanticVersion() string {
-	envVersion := os.Getenv("VERSION")
+	envVersion := os.Getenv("GO_API_VERSION")
 	if envVersion == "" {
 		fileVersion, err := getSemanticVersionFromFile()
 		if err != nil {
-			log.Println("VERSION not set, using default version")
+			log.Println("GO_API_VERSION not set, using default version")
 			return "n.i.l"
 		}
 		return fileVersion
@@ -54,17 +54,27 @@ func getSemanticVersion() string {
 func getSemanticVersionFromFile() (string, error) {
 	file, err := os.Open("version")
 	if err != nil {
-		log.Println("VERSION file not found, using default version")
+		log.Println("version file not found, using default version")
 		return "", err
 	}
 	defer file.Close()
 	buf := make([]byte, 100)
 	n, err := file.Read(buf)
 	if err != nil {
-		log.Println("Error reading VERSION file, using default version")
+		log.Println("Error reading version file, using default version")
 		return "", err
 	}
 	version := string(buf[:n])
 	log.Println("Read version from file: " + version)
 	return version, nil
+}
+
+func GetRegion() *string {
+	region := os.Getenv("GO_API_AWS_REGION")
+	if region == "" {
+		log.Println("GO_API_AWS_REGION not set, using default region")
+		return nil
+	}
+	log.Println("Read region from environment: " + region)
+	return &region
 }

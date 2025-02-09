@@ -1,0 +1,95 @@
+Description: Go POC ECS Task Definition
+
+Parameters:
+  ContainerPort:
+    Description: The port the container listens on
+    Type: Number
+    Default: 8080
+  ProjectTag:
+    Description: Tag to apply to resources in this stack
+    Type: String
+    Default: go-api-poc
+
+Resources:
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: ecs-task-execution-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                Resource: "*"
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions: 
+        - Name: !Sub ${AWS::StackName}-container
+          Image: !Sub
+            - "${repo}:latest"
+            - repo: !ImportValue go-api-poc-ecr-repository-uri # from ecr-stack.yml
+          Cpu: 1024 # 1 vCPU
+          Memory: 2048 # 2GB
+          PortMappings: 
+            - Name: go-api-poc
+              ContainerPort: !Ref ContainerPort
+              HostPort: !Ref ContainerPort
+              Protocol: tcp
+              AppProtocol: http
+          Essential: true
+          LogConfiguration: 
+            LogDriver: awslogs
+            Options:
+              awslogs-create-group: true
+              awslogs-group: !Sub /ecs/${AWS::StackName}
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+              max-buffer-size: 25m
+              mode: non-blocking
+      Cpu: 1024 # 1 vCPU
+      ExecutionRoleArn: !GetAtt TaskExecutionRole.Arn
+      Family: !Sub ${AWS::StackName}-task-definition
+      Memory: 2048 # 2GB
+      NetworkMode: awsvpc
+      RequiresCompatibilities: 
+        - FARGATE
+      RuntimePlatform: 
+        CpuArchitecture: ARM64
+        OperatingSystemFamily: LINUX
+      TaskRoleArn: arn:aws:iam::784593521445:role/ecsTaskExecutionRole
+      Tags: 
+        - Key: Project
+          Value: !Ref ProjectTag
+
+Outputs:
+  TaskDefinitionArn:
+    Description: The ARN of the ECS Task Definition
+    Value: !Ref TaskDefinition
+    Export:
+      Name: !Sub ${AWS::StackName}-task-definition-arn
+  ContainerPort:
+    Description: The port the container listens on
+    Value: !Ref ContainerPort
+    Export:
+      Name: !Sub ${AWS::StackName}-container-port
+  ContainerName:
+    Description: The name of the container
+    Value: !Sub ${AWS::StackName}-container
+    Export:
+      Name: !Sub ${AWS::StackName}-container-name

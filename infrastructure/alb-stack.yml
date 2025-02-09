@@ -1,0 +1,142 @@
+Description: Go POC Application Load Balancer Stack
+
+Parameters:
+  ProjectTag:
+    Description: Tag to apply to resources in this stack
+    Type: String
+    Default: go-api-poc
+
+Resources:
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow internet traffic on port 443
+      VpcId: !ImportValue go-api-poc-networking-VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-alb-security-group 
+        - Key: Project
+          Value: !Ref ProjectTag
+  
+  ALBTargetSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow traffic from ALB on port 80
+      VpcId: !ImportValue go-api-poc-networking-VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-alb-target-security-group
+        - Key: Project
+          Value: !Ref ProjectTag
+  
+  HttpsCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: "giftbitdev.com"
+      # DomainValidationOptions: 
+      #   - DomainName: "*.giftbitdev.com"
+      #     HostedZoneId: String
+      #     ValidationDomain: giftbit.com
+      KeyAlgorithm: RSA_2048
+      SubjectAlternativeNames: 
+        - "*.giftbitdev.com"
+      ValidationMethod: DNS
+      Tags: 
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${AWS::StackName}
+      Subnets:
+        - !ImportValue go-api-poc-networking-PublicSubnet1
+        - !ImportValue go-api-poc-networking-PublicSubnet2
+        - !ImportValue go-api-poc-networking-PublicSubnet3
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Tags:
+        - Key: Project
+          Value: !Ref ProjectTag
+
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: fixed-response
+          FixedResponseConfig:
+            StatusCode: 404
+            ContentType: application/json
+            MessageBody: '{"message": "Not Found"}'
+      LoadBalancerArn: !Ref ALB
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref HttpsCertificate
+
+  Domain:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: "giftbitdev.com."
+      Comment: "ALB DNS record"
+      Name: "goapi.giftbitdev.com"
+      Type: CNAME
+      TTL: 10 # this is low so I can swap regions with the VPN quickly
+      GeoProximityLocation:
+           AWSRegion: !Ref AWS::Region
+           Bias: 0
+      SetIdentifier: !Sub "go-api-${AWS::Region}"
+      ResourceRecords:
+        - !GetAtt ALB.DNSName
+  RegionalDomain:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: "giftbitdev.com."
+      Comment: "ALB DNS record"
+      Name: !Sub "goapi-${AWS::Region}.giftbitdev.com"
+      Type: CNAME
+      TTL: 300
+      ResourceRecords:
+        - !GetAtt ALB.DNSName
+
+Outputs:
+  ALBArn:
+    Description: The ARN of the Application Load Balancer
+    Value: !Ref ALB
+    Export:
+      Name: !Sub ${AWS::StackName}-arn
+  ALBListenerArn:
+    Description: The ARN of the Application Load Balancer listener
+    Value: !Ref ALBListener
+    Export:
+      Name: !Sub ${AWS::StackName}-listener-arn
+  ALBDNSName:
+    Description: The DNS name of the Application Load Balancer
+    Value: !GetAtt ALB.DNSName
+    Export:
+      Name: !Sub ${AWS::StackName}-dns-name
+  ALBSecurityGroup:
+    Description: The ID of the security group for the Application Load Balancer
+    Value: !Ref ALBSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-security-group
+  ALBTargetSecurityGroup:
+    Description: The ID of the security group for the Application Load Balancer targets
+    Value: !Ref ALBTargetSecurityGroup
+    Export:
+      Name: !Sub ${AWS::StackName}-target-security-group
+  HttpsCertificate:
+    Description: The ARN of the HTTPS certificate
+    Value: !Ref HttpsCertificate
+    Export:
+      Name: !Sub ${AWS::StackName}-certificate-arn

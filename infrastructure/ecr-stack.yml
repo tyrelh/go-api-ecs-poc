@@ -1,0 +1,39 @@
+Description: Go POC Elastic Container Registry
+
+Parameters:
+  # AwsAccount:
+  #   Description: "Environment Type"
+  #   Type: String
+  #   Default: "dev"
+  #   AllowedValues:
+  #     - "dev"
+  #     - "production"
+  ProjectTag:
+    Description: Tag to apply to resources in this stack
+    Type: String
+    Default: go-api-poc
+
+Resources:
+  ContainerRegistry:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: !Sub ${AWS::StackName}-repository
+      EmptyOnDelete: false
+      # EncryptionConfiguration: # encryption at rest
+      #   EncryptionConfiguration
+      # ImageScanningConfiguration: # automated scaning of images for known vulnerabilities
+      #   ImageScanningConfiguration
+      # ImageTagMutability: String
+      # LifecyclePolicy: 
+      #   LifecyclePolicy
+      # RepositoryPolicyText: Json
+      Tags: 
+        - Key: Project
+          Value: !Ref ProjectTag
+
+Outputs:
+  RepositoryURI:
+    Description: The URI of the image repository
+    Value: !GetAtt  ContainerRegistry.RepositoryUri
+    Export:
+      Name: !Sub ${AWS::StackName}-repository-uri

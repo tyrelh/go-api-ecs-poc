@@ -384,6 +384,7 @@ type GetGoSystemHealthResponseObject interface {
 }
 
 type GetGoSystemHealth200JSONResponse struct {
+	Region *string `json:"region,omitempty"`
 	Status *string `json:"status,omitempty"`
 }
 
