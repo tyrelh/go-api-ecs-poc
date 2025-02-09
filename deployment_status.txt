@@ -1,2 +1,2 @@
-eu-west-2: active
-ca-west-1: active
+eu-west-2: inactive
+ca-west-1: inactive
