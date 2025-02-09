@@ -1,10 +1,14 @@
 PROJECT_NAME=go-api-poc
-VERSION=$(shell cat version)
+GO_API_VERSION=$(shell cat version)
 BUILD_DIR=bin
-ECR_REGISTRY=784593521445.dkr.ecr.us-west-2.amazonaws.com
-ECR_REPOSITORY=go-api-poc-repository
+AWS_REGION?=ca-west-1
+# ECR_REGISTRY=784593521445.dkr.ecr.us-west-2.amazonaws.com
+ECR_REGISTRY=784593521445.dkr.ecr.${AWS_REGION}.amazonaws.com
+# ECR_REPOSITORY=go-api-poc-repository
+ECR_REPOSITORY=go-api-poc-ecr-repository
 ECS_CLUSTER=go-api-poc-cluster
-ECS_SERVICE=go-api-poc-service
+ECS_SERVICE=go-api-poc-ecs-service
+
 
 
 oapi:
@@ -19,7 +23,7 @@ dev: oapi
 
 build: oapi
 	@echo "##### BUILD #####" && echo
-	@echo "Building version ${VERSION} to ${BUILD_DIR}/${PROJECT_NAME}..."
+	@echo "Building version ${GO_API_VERSION} to ${BUILD_DIR}/${PROJECT_NAME}..."
 	go mod tidy
 	export GOOS=linux && \
 	export CGO_ENABLED=0 && \
@@ -28,26 +32,26 @@ build: oapi
 
 build-image: build
 	@echo "##### BUILD IMAGE #####" && echo
-	@echo "Building version ${VERSION}..."
-	docker build -t ${PROJECT_NAME}:${VERSION} --target production --build-arg VERSION=${VERSION} .
+	@echo "Building version ${GO_API_VERSION}..."
+	docker build -t ${PROJECT_NAME}:${GO_API_VERSION} --target production --build-arg GO_API_VERSION=${GO_API_VERSION} --build-arg GO_API_AWS_REGION=${AWS_REGION} .
 	@echo "🟢 Build complete." && echo
 
 push: build-image
 	@echo "##### PUSH #####" && echo
 	@echo "Logging in to ECR..."
-	aws ecr get-login-password --region us-west-2 --profile infrastructure-admin-dev | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+	aws ecr get-login-password --region ${AWS_REGION} --profile infrastructure-admin-dev | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 	@echo "🟢 Logged in to ECR." && echo
 	@echo "Tagging image..."
-	docker tag ${PROJECT_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPOSITORY}:${VERSION}
-	docker tag ${PROJECT_NAME}:${VERSION} ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+	docker tag ${PROJECT_NAME}:${GO_API_VERSION} ${ECR_REGISTRY}/${ECR_REPOSITORY}:${GO_API_VERSION}
+	docker tag ${PROJECT_NAME}:${GO_API_VERSION} ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
 	@echo "🟢 Tagging complete." && echo
 	@echo "Pushing image to ECR..."
-	docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${VERSION}
+	docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:${GO_API_VERSION}
 	docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
 	@echo "🟢 Push complete." && echo
 
 deploy: push
 	@echo "##### DEPLOY #####" && echo
-	@echo "Deploying ${VERSION} to ECS service..."
-	DEPLOY_RESPONSE=$$(aws ecs update-service --cluster ${ECS_CLUSTER} --service ${ECS_SERVICE} --force-new-deployment --profile infrastructure-admin-dev) && echo "$${DEPLOY_RESPONSE}"
+	@echo "Deploying ${GO_API_VERSION} to ECS service..."
+	DEPLOY_RESPONSE=$$(aws ecs update-service --cluster ${ECS_CLUSTER} --service ${ECS_SERVICE} --force-new-deployment --profile infrastructure-admin-dev --region ${AWS_REGION}) && echo "$${DEPLOY_RESPONSE}"
 	@echo "🟢 Deployment initiated." && echo

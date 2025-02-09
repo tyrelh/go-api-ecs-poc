@@ -47,7 +47,8 @@
 # Create a production stage to run the application binary
 FROM scratch AS production
 
-ARG VERSION=none
+ARG GO_API_VERSION=none
+ARG GO_API_AWS_REGION=none
 
 # WORKDIR /prod
 
@@ -55,7 +56,8 @@ ARG VERSION=none
 # COPY bin ./
 ADD bin /
 
-ENV VERSION=${VERSION}
+ENV GO_API_VERSION=${GO_API_VERSION}
+ENV GO_API_AWS_REGION=${GO_API_AWS_REGION}
 # Document the port that may need to be published
 EXPOSE 8080
 

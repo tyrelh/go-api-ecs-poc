@@ -16,7 +16,9 @@ func (StrictServer) GetGoSystemVersion(ctx context.Context, request api.GetGoSys
 
 func (StrictServer) GetGoSystemHealth(ctx context.Context, request api.GetGoSystemHealthRequestObject) (api.GetGoSystemHealthResponseObject, error) {
 	health := "I'm ok."
+	region := services.GetRegion()
 	return api.GetGoSystemHealth200JSONResponse{
 		Status: &health,
+		Region: region,
 	}, nil
 }

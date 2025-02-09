@@ -1,3 +1,5 @@
 # Go build output
 bin/
 tmp/
+
+__pycache__/

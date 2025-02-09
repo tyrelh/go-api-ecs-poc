@@ -37,6 +37,9 @@ paths:
                   status:
                     type: string
                     example: ItsGood
+                  region:
+                    type: string
+                    example: ca-west-1
   /go/reward:
     get:
       summary: Get a list of active rewards for your account
