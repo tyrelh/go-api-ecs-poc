@@ -29,11 +29,10 @@ func main() {
 		Addr:    ":" + port,
 	}
 
-	// TODO: @tyrelh temporarily disabled database until we have one to connect to
-	// err := db.ConnectToDb()
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to database: %v", err)
-	// }
+	err := db.ConnectToDb()
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
 
 	log.Println("Starting server on port " + port + "...")
 	log.Fatal(server.ListenAndServe())
