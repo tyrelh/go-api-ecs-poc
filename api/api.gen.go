@@ -15,23 +15,26 @@ import (
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
-// Reward defines model for Reward.
-type Reward struct {
+// RewardRequest defines model for RewardRequest.
+type RewardRequest struct {
+	Brand        *string  `json:"brand,omitempty"`
+	Currency     *string  `json:"currency,omitempty"`
+	Denomination *float32 `json:"denomination,omitempty"`
+}
+
+// RewardResponse defines model for RewardResponse.
+type RewardResponse struct {
 	Brand        *string  `json:"brand,omitempty"`
 	Currency     *string  `json:"currency,omitempty"`
 	Denomination *float32 `json:"denomination,omitempty"`
 	Id           *int     `json:"id,omitempty"`
 }
 
-// RewardCreation defines model for RewardCreation.
-type RewardCreation struct {
-	Brand        *string  `json:"brand,omitempty"`
-	Currency     *string  `json:"currency,omitempty"`
-	Denomination *float32 `json:"denomination,omitempty"`
-}
-
 // PostGoRewardJSONRequestBody defines body for PostGoReward for application/json ContentType.
-type PostGoRewardJSONRequestBody = RewardCreation
+type PostGoRewardJSONRequestBody = RewardRequest
+
+// PutGoRewardIdJSONRequestBody defines body for PutGoRewardId for application/json ContentType.
+type PutGoRewardIdJSONRequestBody = RewardRequest
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
@@ -47,6 +50,9 @@ type ServerInterface interface {
 	// Get a Reward by ID
 	// (GET /go/reward/{id})
 	GetGoRewardId(w http.ResponseWriter, r *http.Request, id int)
+	// Update a Reward by ID
+	// (PUT /go/reward/{id})
+	PutGoRewardId(w http.ResponseWriter, r *http.Request, id int)
 	// Get the health of the API
 	// (GET /go/system/health)
 	GetGoSystemHealth(w http.ResponseWriter, r *http.Request)
@@ -133,6 +139,31 @@ func (siw *ServerInterfaceWrapper) GetGoRewardId(w http.ResponseWriter, r *http.
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetGoRewardId(w, r, id)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutGoRewardId operation middleware
+func (siw *ServerInterfaceWrapper) PutGoRewardId(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", r.PathValue("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutGoRewardId(w, r, id)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -294,6 +325,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc("POST "+options.BaseURL+"/go/reward", wrapper.PostGoReward)
 	m.HandleFunc("DELETE "+options.BaseURL+"/go/reward/{id}", wrapper.DeleteGoRewardId)
 	m.HandleFunc("GET "+options.BaseURL+"/go/reward/{id}", wrapper.GetGoRewardId)
+	m.HandleFunc("PUT "+options.BaseURL+"/go/reward/{id}", wrapper.PutGoRewardId)
 	m.HandleFunc("GET "+options.BaseURL+"/go/system/health", wrapper.GetGoSystemHealth)
 	m.HandleFunc("GET "+options.BaseURL+"/go/system/version", wrapper.GetGoSystemVersion)
 
@@ -308,7 +340,7 @@ type GetGoRewardResponseObject interface {
 }
 
 type GetGoReward200JSONResponse struct {
-	Rewards *[]Reward `json:"rewards,omitempty"`
+	Rewards *[]RewardResponse `json:"rewards,omitempty"`
 }
 
 func (response GetGoReward200JSONResponse) VisitGetGoRewardResponse(w http.ResponseWriter) error {
@@ -326,7 +358,7 @@ type PostGoRewardResponseObject interface {
 	VisitPostGoRewardResponse(w http.ResponseWriter) error
 }
 
-type PostGoReward201JSONResponse Reward
+type PostGoReward201JSONResponse RewardResponse
 
 func (response PostGoReward201JSONResponse) VisitPostGoRewardResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -367,9 +399,27 @@ type GetGoRewardIdResponseObject interface {
 	VisitGetGoRewardIdResponse(w http.ResponseWriter) error
 }
 
-type GetGoRewardId200JSONResponse Reward
+type GetGoRewardId200JSONResponse RewardResponse
 
 func (response GetGoRewardId200JSONResponse) VisitGetGoRewardIdResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PutGoRewardIdRequestObject struct {
+	Id   int `json:"id"`
+	Body *PutGoRewardIdJSONRequestBody
+}
+
+type PutGoRewardIdResponseObject interface {
+	VisitPutGoRewardIdResponse(w http.ResponseWriter) error
+}
+
+type PutGoRewardId200JSONResponse RewardRequest
+
+func (response PutGoRewardId200JSONResponse) VisitPutGoRewardIdResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
@@ -426,6 +476,9 @@ type StrictServerInterface interface {
 	// Get a Reward by ID
 	// (GET /go/reward/{id})
 	GetGoRewardId(ctx context.Context, request GetGoRewardIdRequestObject) (GetGoRewardIdResponseObject, error)
+	// Update a Reward by ID
+	// (PUT /go/reward/{id})
+	PutGoRewardId(ctx context.Context, request PutGoRewardIdRequestObject) (PutGoRewardIdResponseObject, error)
 	// Get the health of the API
 	// (GET /go/system/health)
 	GetGoSystemHealth(ctx context.Context, request GetGoSystemHealthRequestObject) (GetGoSystemHealthResponseObject, error)
@@ -563,6 +616,39 @@ func (sh *strictHandler) GetGoRewardId(w http.ResponseWriter, r *http.Request, i
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
 	} else if validResponse, ok := response.(GetGoRewardIdResponseObject); ok {
 		if err := validResponse.VisitGetGoRewardIdResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// PutGoRewardId operation middleware
+func (sh *strictHandler) PutGoRewardId(w http.ResponseWriter, r *http.Request, id int) {
+	var request PutGoRewardIdRequestObject
+
+	request.Id = id
+
+	var body PutGoRewardIdJSONRequestBody
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		sh.options.RequestErrorHandlerFunc(w, r, fmt.Errorf("can't decode JSON body: %w", err))
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.PutGoRewardId(ctx, request.(PutGoRewardIdRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PutGoRewardId")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(PutGoRewardIdResponseObject); ok {
+		if err := validResponse.VisitPutGoRewardIdResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {

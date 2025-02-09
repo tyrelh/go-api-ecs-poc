@@ -51,7 +51,7 @@ paths:
                   rewards:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Reward'
+                      $ref: '#/components/schemas/RewardResponse'
     post:
       summary: Create a reward
       requestBody:
@@ -59,14 +59,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RewardCreation'
+              $ref: '#/components/schemas/RewardRequest'
       responses:
         '201':
           description: The created reward
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Reward'
+                $ref: '#/components/schemas/RewardResponse'
   /go/reward/{id}:
     get:
       summary: Get a Reward by ID
@@ -83,29 +83,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Reward'
-#     put:
-#       summary: Update a Reward by ID
-#       parameters:
-#         - name: id
-#           in: path
-#           required: true
-#           description: The ID of the Reward
-#           schema:
-#             type: string
-#       requestBody:
-#         required: true
-#         content:
-#           application/json:
-#             schema:
-#               $ref: '#/components/schemas/Reward'
-#       responses:
-#         '200':
-#           description: The updated Reward
-#           content:
-#             application/json:
-#               schema:
-#                 $ref: '#/components/schemas/Reward'
+                $ref: '#/components/schemas/RewardResponse'
+    put:
+      summary: Update a Reward by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the Reward
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewardRequest'
+      responses:
+        '200':
+          description: The updated Reward
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewardRequest'
     delete:
       summary: Delete a Reward by ID
       parameters:
@@ -122,7 +122,7 @@ paths:
           description: The Reward was not found
 components:
   schemas:
-    Reward:
+    RewardResponse:
       type: object
       properties:
         id:
@@ -137,7 +137,7 @@ components:
         denomination:
           type: number
           example: 1000
-    RewardCreation:
+    RewardRequest:
       type: object
       properties:
         brand:

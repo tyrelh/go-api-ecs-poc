@@ -7,17 +7,17 @@ ECS_CLUSTER=go-api-poc-cluster
 ECS_SERVICE=go-api-poc-service
 
 
-api:
+oapi:
 	@echo "Generating OpenAPI code..."
 	oapi-codegen --config=api/oapi-codegen.yml api/api.yml
 	@echo "🟢 OpenAPI code generated." && echo
 
-dev: api
+dev: oapi
 	@echo "Local dev using Air"
 	@echo "⚠️ Air won't hot-reload changes to the OpenAPI spec api/api.yml. You'll need to rerun make dev or make api."
 	@air
 
-build: api
+build: oapi
 	@echo "##### BUILD #####" && echo
 	@echo "Building version ${VERSION} to ${BUILD_DIR}/${PROJECT_NAME}..."
 	go mod tidy
