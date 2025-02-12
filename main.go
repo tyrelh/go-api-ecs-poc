@@ -4,6 +4,8 @@ import (
 	"go-api-poc/api"
 	"go-api-poc/controllers"
 	"go-api-poc/middleware"
+
+	"go-api-poc/db"
 	"log"
 	"net/http"
 )

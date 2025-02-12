@@ -14,5 +14,11 @@ require (
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 )
+
+// tool (
+// 	github.com/air-verse/air
+// 	github.com/go-delve/delve/cmd/dlv
+// 	github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+// )

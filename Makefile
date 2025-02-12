@@ -9,7 +9,18 @@ ECR_REPOSITORY=go-api-poc-ecr-repository
 ECS_CLUSTER=go-api-poc-cluster
 ECS_SERVICE=go-api-poc-ecs-service
 
+# docker-dev:
+# 	docker build -t ${PROJECT_NAME}:${GO_API_VERSION} --target development --build-arg GO_API_VERSION=${GO_API_VERSION} --build-arg GO_API_AWS_REGION=${AWS_REGION} .
+# 	docker run --rm --name go-api-poc-local-dev -p 8080:8080 ${PROJECT_NAME}:${GO_API_VERSION}
 
+deps:
+	@echo "##### DEPS #####" && echo
+	@echo "Installing dependencies..."
+	go mod download
+	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+	go install github.com/air-verse/air@latest
+	go install github.com/go-delve/delve/cmd/dlv@latest
+	@echo "🟢 Dependencies installed." && echo
 
 oapi:
 	@echo "Generating OpenAPI code..."
@@ -17,6 +28,8 @@ oapi:
 	@echo "🟢 OpenAPI code generated." && echo
 
 dev: oapi
+	@docker compose up -d
+	@sleep 2
 	@echo "Local dev using Air"
 	@echo "⚠️ Air won't hot-reload changes to the OpenAPI spec api/api.yml. You'll need to rerun make dev or make api."
 	@air

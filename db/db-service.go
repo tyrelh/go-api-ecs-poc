@@ -11,7 +11,7 @@ import (
 
 // TODO: move database config
 var (
-	dbUser              = "go"
+	dbUser              = "root"
 	dbPassword          = "password"
 	dbHost              = "localhost"
 	dbPort              = "5000"
