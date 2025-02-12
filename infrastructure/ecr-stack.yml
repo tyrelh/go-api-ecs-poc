@@ -18,15 +18,7 @@ Resources:
     Type: AWS::ECR::Repository
     Properties:
       RepositoryName: !Sub ${AWS::StackName}-repository
-      EmptyOnDelete: false
-      # EncryptionConfiguration: # encryption at rest
-      #   EncryptionConfiguration
-      # ImageScanningConfiguration: # automated scaning of images for known vulnerabilities
-      #   ImageScanningConfiguration
-      # ImageTagMutability: String
-      # LifecyclePolicy: 
-      #   LifecyclePolicy
-      # RepositoryPolicyText: Json
+      EmptyOnDelete: true
       Tags: 
         - Key: Project
           Value: !Ref ProjectTag
