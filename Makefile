@@ -29,7 +29,7 @@ oapi:
 
 dev: oapi
 	@docker compose up -d
-	@sleep 5
+	@sleep 8
 	@echo "Local dev using Air"
 	@echo "⚠️ Air won't hot-reload changes to the OpenAPI spec api/api.yml. You'll need to rerun make dev or make api."
 	@air
