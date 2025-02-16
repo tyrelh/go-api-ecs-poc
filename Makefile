@@ -20,6 +20,7 @@ deps:
 	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 	go install github.com/air-verse/air@latest
 	go install github.com/go-delve/delve/cmd/dlv@latest
+	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	@echo "🟢 Dependencies installed." && echo
 
 oapi:
