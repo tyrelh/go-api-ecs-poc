@@ -13,6 +13,8 @@ ECS_SERVICE=go-api-poc-ecs-service
 # 	docker build -t ${PROJECT_NAME}:${GO_API_VERSION} --target development --build-arg GO_API_VERSION=${GO_API_VERSION} --build-arg GO_API_AWS_REGION=${AWS_REGION} .
 # 	docker run --rm --name go-api-poc-local-dev -p 8080:8080 ${PROJECT_NAME}:${GO_API_VERSION}
 
+# install global and project dependencies
+# on a fresh clone this should get you set up
 deps:
 	@echo "Checking for global tool dependencies..."
 	@if ! which brew &> /dev/null; then \
@@ -68,11 +70,13 @@ deps:
 	go mod download
 	@echo "✅ All dependencies are installed."
 
+# generate OpenAPI code from the OpenAPI spec
 oapi:
 	@echo "Generating OpenAPI code..."
 	oapi-codegen --config=api/oapi-codegen.yml api/api.yml
 	@echo "✅ OpenAPI code generated." && echo
 
+# run the local development stack
 dev: oapi
 	@echo "Starting DB container..."
 	@docker compose up -d
@@ -88,23 +92,23 @@ dev: oapi
 	@echo "ℹ️ You can connect to the debugger at 127.0.0.1:2345"
 	@air
 
-build: oapi
-	@echo "##### BUILD #####" && echo
-	@echo "Building version ${GO_API_VERSION} to ${BUILD_DIR}/${PROJECT_NAME}..."
+# build the Go binary
+build-binary: oapi
+	@echo "Building Go binary of version ${GO_API_VERSION} to ${BUILD_DIR}/${PROJECT_NAME}..."
 	go mod tidy
 	export GOOS=linux && \
 	export CGO_ENABLED=0 && \
 	go build -o ${BUILD_DIR}/${PROJECT_NAME} .
 	@echo "🟢 Build complete." && echo
 
-build-image: build
-	@echo "##### BUILD IMAGE #####" && echo
-	@echo "Building version ${GO_API_VERSION}..."
+# build the Docker image
+build: oapi
+	@echo "Building Docker image of version ${GO_API_VERSION}..."
 	docker build -t ${PROJECT_NAME}:${GO_API_VERSION} --target production --build-arg GO_API_VERSION=${GO_API_VERSION} --build-arg GO_API_AWS_REGION=${AWS_REGION} .
 	@echo "🟢 Build complete." && echo
 
+# push the Docker image to ECR with appropriate tags
 push: build-image
-	@echo "##### PUSH #####" && echo
 	@echo "Logging in to ECR..."
 	aws ecr get-login-password --region ${AWS_REGION} --profile infrastructure-admin-dev | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 	@echo "🟢 Logged in to ECR." && echo
@@ -117,8 +121,8 @@ push: build-image
 	docker push ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
 	@echo "🟢 Push complete." && echo
 
+# deploy the Docker image to ECS
 deploy: push
-	@echo "##### DEPLOY #####" && echo
 	@echo "Deploying ${GO_API_VERSION} to ECS service..."
 	DEPLOY_RESPONSE=$$(aws ecs update-service --cluster ${ECS_CLUSTER} --service ${ECS_SERVICE} --force-new-deployment --profile infrastructure-admin-dev --region ${AWS_REGION}) && echo "$${DEPLOY_RESPONSE}"
 	@echo "🟢 Deployment initiated." && echo
