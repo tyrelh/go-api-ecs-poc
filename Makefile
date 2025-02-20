@@ -71,13 +71,21 @@ deps:
 oapi:
 	@echo "Generating OpenAPI code..."
 	oapi-codegen --config=api/oapi-codegen.yml api/api.yml
-	@echo "🟢 OpenAPI code generated." && echo
+	@echo "✅ OpenAPI code generated." && echo
 
 dev: oapi
+	@echo "Starting DB container..."
 	@docker compose up -d
-	@sleep 8
-	@echo "Local dev using Air"
-	@echo "⚠️ Air won't hot-reload changes to the OpenAPI spec api/api.yml. You'll need to rerun make dev or make api."
+	@echo "Waiting for DB container to be healthy..."
+	@while [ "$$(docker inspect --format='{{json .State.Health.Status}}' go-api-poc-db | jq -r .)" != "healthy" ]; do \
+		echo "Waiting for go-api-poc-db to be healthy..."; \
+		sleep 1; \
+	done
+	@sleep 0.5
+	@echo "✅ DB container is runing and healthy." && echo
+	@echo "Starting local dev using Air..."
+	@echo "⚠️ Air won't hot-reload changes to the OpenAPI spec api/api.yml. You'll need to rerun make dev or make api"
+	@echo "ℹ️ You can connect to the debugger at 127.0.0.1:2345"
 	@air
 
 build: oapi
