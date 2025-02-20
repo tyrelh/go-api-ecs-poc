@@ -14,14 +14,59 @@ ECS_SERVICE=go-api-poc-ecs-service
 # 	docker run --rm --name go-api-poc-local-dev -p 8080:8080 ${PROJECT_NAME}:${GO_API_VERSION}
 
 deps:
-	@echo "##### DEPS #####" && echo
-	@echo "Installing dependencies..."
+	@echo "Checking for global tool dependencies..."
+	@if ! which brew &> /dev/null; then \
+		echo "Installing Brew..."; \
+		curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh | sh; \
+		echo "✅ Brew installed"; \
+	else \
+		echo "🟢 Brew is already installed"; \
+	fi
+	@if ! which go &> /dev/null; then \
+		echo "Installing Go..."; \
+		brew install golang; \
+		echo "✅ Go installed"; \
+	else \
+		echo "🟢 Go is already installed"; \
+	fi
+	@if ! which docker &> /dev/null; then \
+		echo "Installing Docker..."; \
+		brew install --cask docker; \
+		echo "✅ Docker installed"; \
+	else \
+		echo "🟢 Docker is already installed"; \
+	fi
+	@if ! which oapi-codegen &> /dev/null; then \
+		echo "Installing oapi-codegen..."; \
+		go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest; \
+		echo "✅ oapi-codegen installed"; \
+	else \
+		echo "🟢 oapi-codegen is already installed"; \
+	fi
+	@if ! which air &> /dev/null; then \
+		echo "Installing Air..."; \
+		go install github.com/air-verse/air@latest; \
+		echo "✅ Air installed"; \
+	else \
+		echo "🟢 Air is already installed"; \
+	fi
+	@if ! which dlv &> /dev/null; then \
+		echo "Installing Delve..."; \
+		go install github.com/go-delve/delve/cmd/dlv@latest; \
+		echo "✅ Delve installed"; \
+	else \
+		echo "🟢 Delve is already installed"; \
+	fi
+	@if ! which sqlc &> /dev/null; then \
+		echo "Installing sqlc..."; \
+		go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest; \
+		echo "✅ sqlc installed"; \
+	else \
+		echo "🟢 sqlc is already installed"; \
+	fi
+	@echo "Downloading project dependencies..."
 	go mod download
-	go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
-	go install github.com/air-verse/air@latest
-	go install github.com/go-delve/delve/cmd/dlv@latest
-	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-	@echo "🟢 Dependencies installed." && echo
+	@echo "✅ All dependencies are installed."
 
 oapi:
 	@echo "Generating OpenAPI code..."
