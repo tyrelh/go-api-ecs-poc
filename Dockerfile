@@ -1,76 +1,41 @@
-# Pull base image
 FROM golang:1.23-alpine AS base
 
 # Development stage
 # =======================================================
-# Create a development stage based on the base image
+# Sets up a development environment with hot-reloading
+# and debugging tools.
 FROM base AS development
-
-# Install git
 RUN apk update
 RUN apk add --no-cache git
 RUN apk add --no-cache curl
-
-# Where our files will be in the docker container 
 WORKDIR /app
-
-# Copy the source from the current directory to the working Directory inside the container 
-# Source also contains go.mod and go.sum which are dependency files
 COPY . .
-
-# Install dependencies
 RUN go mod download
-
-# RUN CGO_ENABLED=0 go build -o app
-
 EXPOSE 8080
-
-# Install the air CLI for auto-reloading
-# RUN go install github.com/airdb/air@latest
 RUN curl -sSfL https://goblin.run/github.com/air-verse/air | sh
-
-# Start air for live reloading
 CMD ["air"]
 
 # Build stage
 # =======================================================
-# Create a build stage based on the base image
-# FROM base AS builder
-
-# # Move to working directory /build
-# WORKDIR /build
-
-# # Copy the go.mod and go.sum files to the /build directory
-# COPY go.mod ./
-
-# # Install dependencies
-# RUN go mod download
-
-# # Copy the entire source code into the container
-# COPY . .
-
-# # Build the application
-# RUN CGO_ENABLED=0 go build -o app
+# Builds the Go binary in a container so that it's
+# build environment is consistent and isolated. 
+FROM base AS builder
+WORKDIR /build
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -o app
 
 # Production stage
 # =======================================================
-# Create a production stage to run the application binary
+# Copies the Go binary from the build stage into a
+# scratch container to keep the image size small.
 FROM scratch AS production
-
+WORKDIR /prod
 ARG GO_API_VERSION=none
 ARG GO_API_AWS_REGION=none
-
-# WORKDIR /prod
-
-# Copy binary from builder stage
-# COPY bin ./
-ADD bin /
-
+COPY --from=builder /build/app ./
 ENV GO_API_VERSION=${GO_API_VERSION}
 ENV GO_API_AWS_REGION=${GO_API_AWS_REGION}
-# Document the port that may need to be published
 EXPOSE 8080
-
-# Start the application
-CMD ["/go-api-poc"]
-
+CMD ["/prod/app"]
