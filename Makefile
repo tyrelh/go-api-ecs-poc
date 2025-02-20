@@ -108,7 +108,7 @@ build: oapi
 	@echo "🟢 Build complete." && echo
 
 # push the Docker image to ECR with appropriate tags
-push: build-image
+push: build
 	@echo "Logging in to ECR..."
 	aws ecr get-login-password --region ${AWS_REGION} --profile infrastructure-admin-dev | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 	@echo "🟢 Logged in to ECR." && echo
