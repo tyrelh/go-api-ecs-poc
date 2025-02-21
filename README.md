@@ -105,6 +105,17 @@ make api
 make deploy
 ```
 
+## Deploy whole stack of infrastructure to an AWS Region
+
+Navigate to the _junk-drawer_ directory and run:
+```bash
+./deploy-all.sh --aws-account dev --aws-region ca-west-1
+```
+
+You can also terminate all resources in a given region
+```bash
+./terminate-all.sh --aws-account dev --aws-region ca-west-1
+```
 
 # API
 

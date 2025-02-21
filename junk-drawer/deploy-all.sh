@@ -83,7 +83,7 @@ for stack in "${STACKS[@]}"; do
     TEMPLATE="${stack%%:*}"
     NAME="${stack##*:}"
 
-    command="aws cloudformation deploy --template-file infrastructure/$TEMPLATE --stack-name $NAME --parameter-overrides AwsAccount=$AWS_ACCOUNT --profile $PROFILE --region $AWS_REGION --capabilities CAPABILITY_IAM"
+    command="aws cloudformation deploy --template-file ../infrastructure/$TEMPLATE --stack-name $NAME --parameter-overrides AwsAccount=$AWS_ACCOUNT --profile $PROFILE --region $AWS_REGION --capabilities CAPABILITY_IAM"
     run_process "$command"
     if [ $? -ne 0 ]; then
         echo "❌ Failed to deploy $TEMPLATE"
@@ -94,7 +94,7 @@ for stack in "${STACKS[@]}"; do
 
     if [ "$TEMPLATE" == "ecr-stack.yml" ]; then
         echo "Pushing the image to the new ECR..."
-        command="make push AWS_REGION=$AWS_REGION"
+        command="make -C .. push AWS_REGION=$AWS_REGION"
         run_process "$command"
         if [ $? -ne 0 ]; then
             echo "❌ Failed to push the image to the new ECR"

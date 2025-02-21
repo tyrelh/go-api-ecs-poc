@@ -58,11 +58,11 @@ read -p "🚸 This will terminate all Go API POC resources for a region, excludi
 echo "Terminating Go API POC in $AWS_REGION..."
 
 STACKS=(
-    "ecs-service-stack.yml:go-api-poc-ecs-service"
-    "ecs-task-stack.yml:go-api-poc-ecs-task"
-    "alb-stack.yml:go-api-poc-alb"
-    "ecr-stack.yml:go-api-poc-ecr"
-    "networking-stack.yml:go-api-poc-networking"
+    "../infrastructure/ecs-service-stack.yml:go-api-poc-ecs-service"
+    "../infrastructure/ecs-task-stack.yml:go-api-poc-ecs-task"
+    "../infrastructure/alb-stack.yml:go-api-poc-alb"
+    "../infrastructure/ecr-stack.yml:go-api-poc-ecr"
+    "../infrastructure/networking-stack.yml:go-api-poc-networking"
 )
 ECR_REPOSITORY_NAME="go-api-poc-ecr-repository"
 
