@@ -4,41 +4,25 @@ This is a simple API POC using Go, Docker, and ECS.
 
 ## Dependencies
 
-### Go
-If you don't already have Go installed, you can install with Brew:
-```bash
-brew install golang
-# test
-go version
-```
-### Docker
-I recommend just installing Docker Desktop. It comes bundled with the Docker & Compose CLIs:
-```bash
-brew install --cask docker
-# test
-docker -v
-```
+You should be able to run `make deps` in the root of the project and it will install all necessary dependencies for you, including:
+- Brew
+- Go
+- Docker
+- Air
+- Delve
+- oapi-codegen
+- sqlc
 
-### Air
-[Air](https://github.com/air-verse/air) is a Go app used for hot-reloading Go projects. Can be installed via Goblin:
-```bash
-curl -sSfL https://goblin.run/github.com/air-verse/air | sh
-# add GOPATH to PATH if you don't already have this
-echo '\nexport GOPATH="$HOME/go"' >> ~/.zshrc
-echo '\nexport PATH=$PATH:$GOPATH/bin' >> ~/.zshrc
-# test
-air -v
-```
+There are two things you may need to manually do.
 
-### oapi-codegen
-[oapi-codegen](https://github.com/oapi-codegen/oapi-codegen) is a Go app used to generate the backend scaffolding code from the OpenAPI specification file. Can be installed globally with Go:
+### Go PATH
+After running `make deps`, try runnig `which air`. If you **DON'T** see a path to the `air` binary, then you'll need to do the following:
 ```bash
-go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
 # add GOPATH to PATH if you don't already have this
-echo '\nexport GOPATH="$HOME/go"' >> ~/.zshrc
-echo '\nexport PATH=$PATH:$GOPATH/bin' >> ~/.zshrc
-# test
-oapi-codegen -version
+echo '\n# go path' >> ~/.zshrc
+echo 'export GOPATH="$HOME/go"' >> ~/.zshrc
+echo 'export GOBIN=$GOPATH/bin' >> ~/.zshrc
+echo 'export PATH=$PATH:$GOBIN' >> ~/.zshrc
 ```
 
 ### AWS CLI
@@ -48,6 +32,7 @@ brew install awscli
 # test
 aws --version
 ```
+For Giftbit devs, use your development stick credentials you already have. You'll need access to _InfrastructureAdminRole_ in the dev account and the _infrastructure-admin-dev_ profile configured on your laptop. Reach out to Tyrel if you need assistance setting that up.
 
 ## Run Locally
 
@@ -55,9 +40,9 @@ aws --version
 make dev
 ```
 
-Or run the docker container:
+Or experimentially run the app in a docker container locally:
 ```bash
-make build-image
+make build
 docker run -p 8080:8080 go-api-poc
 ```
 
@@ -65,12 +50,12 @@ docker run -p 8080:8080 go-api-poc
 
 Build Go binary:
 ```bash
-make build
+make build-binary
 ```
 
 Build Go binary and Docker Image:
 ```bash
-make build-image
+make build
 ```
 
 Build Docker Image and push to ECR:
@@ -95,7 +80,7 @@ export PATH=$PATH:$GOPATH/bin
 
 Just run OpenAPI codegen for the *api/api.yml* API specification:
 ```bash
-make api
+make oapi
 ```
 
 ## Deploy to ECS
